@@ -20,11 +20,11 @@ module  pcie_rd_fram_buf_tb;
 localparam  T_CLK_PERIOD       = 10 ;       //clock a half perid
 localparam  T_RST_TIME         = 200 ;       //reset time 
 
-localparam WR_ADDR_WIDTH = 11 ; // @IPC int 9,20
+localparam WR_ADDR_WIDTH = 9 ; // @IPC int 9,20
 
-localparam WR_DATA_WIDTH = 32 ; // @IPC int 1,1152
+localparam WR_DATA_WIDTH = 256 ; // @IPC int 1,1152
 
-localparam RD_ADDR_WIDTH = 8 ; // @IPC int 9,20
+localparam RD_ADDR_WIDTH = 9 ; // @IPC int 9,20
 
 localparam RD_DATA_WIDTH = 256 ; // @IPC int 1,1152
 
