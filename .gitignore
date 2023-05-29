@@ -1,0 +1,8 @@
+compile
+synthesize
+impl.tcl
+*.log
+device_map
+place_route
+report_timing
+generate_bitstream
