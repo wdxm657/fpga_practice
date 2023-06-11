@@ -154,7 +154,7 @@ module TOP#(
 /////////////////////////////////////////////////////////////////////////////////////
 wire pix_clk;
 //PLL
-    pll u_pll (
+    ip_pll u_pll (
         .clkin1   (  sys_clk    ),//50MHz
         .clkout0  (  pix_clk    ),//37.125M 720P30 | 148.5M 1080P60
         .clkout1  (  cfg_clk    ),//10MHz
