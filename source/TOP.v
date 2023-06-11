@@ -402,7 +402,7 @@ assign pix_clk_1080p   =  pixclk_in    ;
 /**/
 
 //ddr    
-        DDR3_50H u_DDR3_50H (
+        ip_ddr3 u_DDR3_50H (
              .ref_clk                   (sys_clk            ),
              .resetn                    (rstn_out           ),// input
              .ddr_init_done             (ddr_init_done      ),// output

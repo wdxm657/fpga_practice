@@ -12,10 +12,10 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 // Library:
-// Filename:wr_fram_buf.v
+// Filename:rd_fram_buf.v
 //////////////////////////////////////////////////////////////////////////////
 
-module wr_fram_buf
+module rd_fram_buf
     (
     wr_data        , //input write data
     wr_addr        , //input write address
@@ -32,13 +32,13 @@ module wr_fram_buf
     );
 
 
-localparam WR_ADDR_WIDTH = 11 ; // @IPC int 9,20
+localparam WR_ADDR_WIDTH = 9 ; // @IPC int 9,20
 
-localparam WR_DATA_WIDTH = 32 ; // @IPC int 1,1152
+localparam WR_DATA_WIDTH = 256 ; // @IPC int 1,1152
 
-localparam RD_ADDR_WIDTH = 8 ; // @IPC int 9,20
+localparam RD_ADDR_WIDTH = 12 ; // @IPC int 9,20
 
-localparam RD_DATA_WIDTH = 256 ; // @IPC int 1,1152
+localparam RD_DATA_WIDTH = 32 ; // @IPC int 1,1152
 
 localparam OUTPUT_REG = 0 ; // @IPC bool
 
@@ -136,7 +136,7 @@ assign rd_data         = ((DEVICE_NAME == "PGT30G") && (RD_DATA_WIDTH <= 9)) ? r
 
 
 //ipml_sdpram IP instance
-ipml_sdpram_v1_6_wr_fram_buf
+ipml_sdpram_v1_6_rd_fram_buf
     #(
     .c_SIM_DEVICE           (SIM_DEVICE             ),
     .c_WR_ADDR_WIDTH        (WR_ADDR_WIDTH          ),
@@ -156,7 +156,7 @@ ipml_sdpram_v1_6_wr_fram_buf
     .c_INIT_FORMAT          (INIT_FORMAT            ),
     .c_WR_BYTE_EN           (WR_BYTE_EN             ),
     .c_BE_WIDTH             (BE_WIDTH               )
-    ) U_ipml_sdpram_wr_fram_buf
+    ) U_ipml_sdpram_rd_fram_buf
     (
     .wr_data                (wr_data_wrap           ),//input write data
     .wr_addr                (wr_addr                ),//input write address

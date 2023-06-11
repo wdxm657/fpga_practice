@@ -12,21 +12,21 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 // Library:
-// Filename:TB wr_fram_buf_tb.v 
+// Filename:TB rd_fram_buf_tb.v 
 //////////////////////////////////////////////////////////////////////////////
 `timescale   1ns / 1ps
 
-module  wr_fram_buf_tb;
+module  rd_fram_buf_tb;
 localparam  T_CLK_PERIOD       = 10 ;       //clock a half perid
 localparam  T_RST_TIME         = 200 ;       //reset time 
 
-localparam WR_ADDR_WIDTH = 11 ; // @IPC int 9,20
+localparam WR_ADDR_WIDTH = 9 ; // @IPC int 9,20
 
-localparam WR_DATA_WIDTH = 32 ; // @IPC int 1,1152
+localparam WR_DATA_WIDTH = 256 ; // @IPC int 1,1152
 
-localparam RD_ADDR_WIDTH = 8 ; // @IPC int 9,20
+localparam RD_ADDR_WIDTH = 12 ; // @IPC int 9,20
 
-localparam RD_DATA_WIDTH = 256 ; // @IPC int 1,1152
+localparam RD_DATA_WIDTH = 32 ; // @IPC int 1,1152
 
 localparam OUTPUT_REG = 0 ; // @IPC bool
 
@@ -302,7 +302,7 @@ GTP_GRS GRS_INST(
     .GRS_N(1'b1)
     ) ;
 
-wr_fram_buf U_wr_fram_buf (
+rd_fram_buf U_rd_fram_buf (
     .wr_data        ( tb_wrdata_cnt                 ),
     .wr_addr        ( tb_wr_addr[WR_ADDR_WIDTH-1:0] ),
     .wr_en          ( tb_wr_en                      ),
