@@ -48,9 +48,7 @@ module rd_buf #(
     input                         ddr_rdone,
     
     input [8*DQ_WIDTH- 1'b1 : 0]  ddr_rdata,
-    input                         ddr_rdata_en,
-
-    output            reg            pcie_able
+    input                         ddr_rdata_en 
 );
     localparam SIM            = 1'b0;
     localparam RAM_WIDTH      = 16'd32;
@@ -106,17 +104,7 @@ module rd_buf #(
     
     // vs pos
     assign wr_rst = ~wr_fsync_3d && wr_fsync_2d;
-
-    always @(posedge ddr_clk)
-    begin 
-        if(wr_rst)
-            pcie_able <= 0;
-        else if( wr_line == V_NUM && ddr_rdone )
-            pcie_able <= 1;
-        else if(wr_trig)
-            pcie_able <= 0;
-    end 
-
+    
     //==========================================================================
     reg [FRAME_CNT_WIDTH - 1'b1 :0] wr_frame_cnt=0;
     always @(posedge ddr_clk)

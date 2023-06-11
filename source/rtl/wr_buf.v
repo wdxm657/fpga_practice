@@ -48,8 +48,7 @@ module wr_buf #(
     input                         ddr_wdata_req,
     
     output [FRAME_CNT_WIDTH-1 :0] frame_wcnt,
-    output                        frame_wirq,
-    output                        hdmi_ddr_cur_fram
+    output                        frame_wirq
 );
     localparam RAM_WIDTH      = 16'd32;
     localparam DDR_DATA_WIDTH = DQ_WIDTH * 8; //256
@@ -315,5 +314,5 @@ endgenerate
     assign ddr_wr_len = RD_ONE_LINE_NUM;
     assign frame_wcnt = rd_frame_cnt;
     assign frame_wirq = wirq_en && rd_fsync_3d;
-    assign hdmi_ddr_cur_fram = rd_frame_cnt[0];
+    
 endmodule

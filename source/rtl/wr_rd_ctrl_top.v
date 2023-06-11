@@ -25,48 +25,26 @@ module wr_rd_ctrl_top # (
 ) (
     input                        clk         ,
     input                        rstn        ,
-
-    input                         pcie,
     
     input                        wr_cmd_en   ,
     input  [CTRL_ADDR_WIDTH-1:0] wr_cmd_addr ,
     input  [31: 0]               wr_cmd_len  ,
-    output     reg                  wr_cmd_ready, // un
-    output     reg                  wr_cmd_done,
+    output                       wr_cmd_ready, // un
+    output                       wr_cmd_done,
     
     output                       wr_bac, // un
     input  [MEM_DQ_WIDTH*8-1:0]  wr_ctrl_data,
-    output     reg                  wr_data_re  ,
+    output                       wr_data_re  ,
     
     input                        rd_cmd_en   ,
     input  [CTRL_ADDR_WIDTH-1:0] rd_cmd_addr ,
     input  [31: 0]               rd_cmd_len  ,
-    output     reg                  rd_cmd_ready, 
-    output      reg                  rd_cmd_done,
+    output                       rd_cmd_ready, 
+    output                       rd_cmd_done,
     
     input                        read_ready  /* synthesis PAP_MARK_DEBUG="true" */,    
-    output   reg [MEM_DQ_WIDTH*8-1:0]  read_rdata  /* synthesis PAP_MARK_DEBUG="true" */,    
-    output    reg                   read_en     /* synthesis PAP_MARK_DEBUG="true" */,    
-
-    input                        wr_cmd_en_1   ,
-    input  [CTRL_ADDR_WIDTH-1:0] wr_cmd_addr_1 ,
-    input  [31: 0]               wr_cmd_len_1  ,
-    output    reg                   wr_cmd_ready_1, // un
-    output    reg                   wr_cmd_done_1,
-    
-    output                       wr_bac_1, // un
-    input  [MEM_DQ_WIDTH*8-1:0]  wr_ctrl_data_1,
-    output    reg                   wr_data_re_1  ,
-    
-    input                        rd_cmd_en_1   ,
-    input  [CTRL_ADDR_WIDTH-1:0] rd_cmd_addr_1 ,
-    input  [31: 0]               rd_cmd_len_1  ,
-    output    reg                   rd_cmd_ready_1, 
-    output    reg                   rd_cmd_done_1,
-    
-    input                        read_ready_1  /* synthesis PAP_MARK_DEBUG="true" */,    
-    output reg [MEM_DQ_WIDTH*8-1:0]  read_rdata_1  /* synthesis PAP_MARK_DEBUG="true" */,  
-    output reg                     read_en_1,  
+    output [MEM_DQ_WIDTH*8-1:0]  read_rdata  /* synthesis PAP_MARK_DEBUG="true" */,    
+    output                       read_en     /* synthesis PAP_MARK_DEBUG="true" */,    
                                       
     // write channel                            
     output [CTRL_ADDR_WIDTH-1:0] axi_awaddr  ,  
@@ -119,56 +97,6 @@ module wr_rd_ctrl_top # (
     wire [3:0]                  rd_len     /* synthesis PAP_MARK_DEBUG="true" */;            
     wire                        rd_done_p  /* synthesis PAP_MARK_DEBUG="true" */;   
 
-    wire                      wr_cmd_en_x   ;
-    wire[CTRL_ADDR_WIDTH-1:0] wr_cmd_addr_x ;
-    wire[31: 0]               wr_cmd_len_x  ;
-    wire                      wr_cmd_ready_x; // un
-    wire                      wr_cmd_done_x;
-
-    wire                      wr_bac_x; // un
-    wire[MEM_DQ_WIDTH*8-1:0]  wr_ctrl_data_x;
-    wire                      wr_data_re_x  ;
-
-    wire                      rd_cmd_en_x   ;
-    wire[CTRL_ADDR_WIDTH-1:0] rd_cmd_addr_x ;
-    wire[31: 0]               rd_cmd_len_x  ;
-    wire                      rd_cmd_ready_x; 
-    wire                      rd_cmd_done_x;
-
-    wire                      read_ready_x; 
-    wire[MEM_DQ_WIDTH*8-1:0]  read_rdata_x; 
-    wire                      read_en_x;    
-
-assign wr_cmd_en_x = pcie ? wr_cmd_en_1 : wr_cmd_en;
-assign wr_cmd_addr_x = pcie ? wr_cmd_addr_1 : wr_cmd_addr;
-assign wr_cmd_len_x = pcie ? wr_cmd_len_1 : wr_cmd_len;
-assign wr_bac_x = pcie ? wr_bac_x : wr_bac;
-assign wr_ctrl_data_x = pcie ? wr_ctrl_data_1 : wr_ctrl_data;
-assign rd_cmd_en_x = pcie ? rd_cmd_en_1 : rd_cmd_en;
-assign rd_cmd_addr_x = pcie ? rd_cmd_addr_1 : rd_cmd_addr;
-assign rd_cmd_len_x = pcie ? rd_cmd_len_1 : rd_cmd_len;
-assign read_ready_x = pcie ? read_ready_1 : read_ready;
-
-always@(*)begin
-    if(pcie)begin
-        wr_cmd_ready_1 <= wr_cmd_ready_x;
-        wr_cmd_done_1 <= wr_cmd_done_x;
-        wr_data_re_1 <= wr_data_re_x;
-        rd_cmd_ready_1 <= rd_cmd_ready_x;
-        rd_cmd_done_1 <= rd_cmd_done_x;
-        read_rdata_1 <= read_rdata_x;
-        read_en_1 <= read_en_x;
-    end
-    else begin
-        wr_cmd_ready <= wr_cmd_ready_x;
-        wr_cmd_done <= wr_cmd_done_x;
-        wr_data_re <= wr_data_re_x;
-        rd_cmd_ready <= rd_cmd_ready_x;
-        rd_cmd_done <= rd_cmd_done_x;
-        read_rdata <= read_rdata_x;
-        read_en <= read_en_x;
-    end
-end
     wr_cmd_trans#(
         .CTRL_ADDR_WIDTH  (  CTRL_ADDR_WIDTH  ),//parameter                    CTRL_ADDR_WIDTH      = 28,
         .MEM_DQ_WIDTH     (  MEM_DQ_WIDTH     ) //parameter                    MEM_DQ_WIDTH         = 16
@@ -176,14 +104,14 @@ end
         .clk              (  clk              ),//input                        clk            ,
         .rstn             (  rstn             ),//input                        rstn           ,
                     
-        .wr_cmd_en        (  wr_cmd_en_x        ),//input                            wr_cmd_en,
-        .wr_cmd_addr      (  wr_cmd_addr_x      ),//input  [CTRL_ADDR_WIDTH-1:0]     wr_cmd_addr,
-        .wr_cmd_len       (  wr_cmd_len_x       ),//input  [31��0]                   wr_cmd_len,
-        .wr_cmd_ready     (  wr_cmd_ready_x     ),//output reg                       wr_cmd_ready,
-        .wr_cmd_done      (  wr_cmd_done_x      ),//output reg                       wr_cmd_done,
-        .wr_bac           (  wr_bac_x           ),//input                            wr_bac,                                
-        .wr_ctrl_data     (  wr_ctrl_data_x     ),//input  [MEM_DQ_WIDTH*8-1:0]      wr_ctrl_data,
-        .wr_data_re       (  wr_data_re_x       ),//output reg                       wr_data_re,
+        .wr_cmd_en        (  wr_cmd_en        ),//input                            wr_cmd_en,
+        .wr_cmd_addr      (  wr_cmd_addr      ),//input  [CTRL_ADDR_WIDTH-1:0]     wr_cmd_addr,
+        .wr_cmd_len       (  wr_cmd_len       ),//input  [31��0]                   wr_cmd_len,
+        .wr_cmd_ready     (  wr_cmd_ready     ),//output reg                       wr_cmd_ready,
+        .wr_cmd_done      (  wr_cmd_done      ),//output reg                       wr_cmd_done,
+        .wr_bac           (  wr_bac           ),//input                            wr_bac,                                
+        .wr_ctrl_data     (  wr_ctrl_data     ),//input  [MEM_DQ_WIDTH*8-1:0]      wr_ctrl_data,
+        .wr_data_re       (  wr_data_re       ),//output reg                       wr_data_re,
                                 
         .wr_en            (  wr_en            ),//output reg                       wr_en,        
         .wr_addr          (  wr_addr          ),//output reg [CTRL_ADDR_WIDTH-1:0] wr_addr,      
@@ -194,12 +122,12 @@ end
         .wr_ready         (  wr_ready         ),//input                            wr_ready,
         .wr_done          (  wr_done          ),//input                            wr_done,
                                               
-        .rd_cmd_en        (  rd_cmd_en_x        ),//input                            rd_cmd_en,
-        .rd_cmd_addr      (  rd_cmd_addr_x      ),//input  [CTRL_ADDR_WIDTH-1:0]     rd_cmd_addr,
-        .rd_cmd_len       (  rd_cmd_len_x       ),//input  [31��0]                   rd_cmd_len,
-        .rd_cmd_ready     (  rd_cmd_ready_x     ),//output reg                       rd_cmd_ready,
-        .rd_cmd_done      (  rd_cmd_done_x      ),//output reg                       rd_cmd_done,
-        .read_en          (  read_en_x          ),//input                            read_en,
+        .rd_cmd_en        (  rd_cmd_en        ),//input                            rd_cmd_en,
+        .rd_cmd_addr      (  rd_cmd_addr      ),//input  [CTRL_ADDR_WIDTH-1:0]     rd_cmd_addr,
+        .rd_cmd_len       (  rd_cmd_len       ),//input  [31��0]                   rd_cmd_len,
+        .rd_cmd_ready     (  rd_cmd_ready     ),//output reg                       rd_cmd_ready,
+        .rd_cmd_done      (  rd_cmd_done      ),//output reg                       rd_cmd_done,
+        .read_en          (  read_en          ),//input                            read_en,
                                               
         .rd_en            (  rd_en            ),//output reg                       rd_en        ,                 
         .rd_addr          (  rd_addr          ),//output reg [CTRL_ADDR_WIDTH-1:0] rd_addr      ,           
@@ -258,9 +186,9 @@ end
         .read_en          (  rd_en            ),//input                                read_en         ,
         .read_done_p      (  rd_done_p        ),//output reg                           read_done_p     ,
                                                                                  
-        .read_ready       (  read_ready_x       ),//input                                read_ready      ,
-        .read_rdata       (  read_rdata_x       ),//output   [MEM_DQ_WIDTH*8-1:0]        read_rdata      ,
-        .read_rdata_en    (  read_en_x          ),//output                               read_en         ,
+        .read_ready       (  read_ready       ),//input                                read_ready      ,
+        .read_rdata       (  read_rdata       ),//output   [MEM_DQ_WIDTH*8-1:0]        read_rdata      ,
+        .read_rdata_en    (  read_en          ),//output                               read_en         ,
                                                                                    
         .axi_araddr       (  axi_araddr       ),//output reg [CTRL_ADDR_WIDTH-1:0]     axi_araddr      ,    
         .axi_arid         (  axi_arid         ),//output reg [3:0]                     axi_arid        ,
