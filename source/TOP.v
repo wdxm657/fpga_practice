@@ -278,28 +278,6 @@ assign     i_rgb565        =    {cmos2_d_16bit[4:0],cmos2_d_16bit[10:5],cmos2_d_
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**/
 
-test_scaler #   (
-
-    .VSYNC_PLUS_VBP   (41)   
-	
-) test_scaler (
-.rst_n(rstn_out)          ,			
-.scaler_clk(pixclk_in)     ,
-
-.pclk_in(pixclk_in)        ,
-.pix_data_in({r_in,g_in,b_in})    ,
-.vs_in(vs_in)          ,
-.hs_in(hs_in)          ,
-.de_in(de_in)          ,	
-
-.hdmi_en()         ,
-.hdmi_clk(pixclk_in)        ,
-.hdmi_req()        ,
-.hdmi_vs()         ,
-.hdmi_data()       
-   );
-
-
 wire [15:0] hdmi_rgb565;
 assign hdmi_rgb565 = {r_in[7:3],g_in[7:2],b_in[7:3]};
 /* ddr buffer sig*/
