@@ -278,30 +278,10 @@ assign     i_rgb565        =    {cmos2_d_16bit[4:0],cmos2_d_16bit[10:5],cmos2_d_
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**/
 
-test_scaler #   (
-
-    .VSYNC_PLUS_VBP   (41)   
-	
-) test_scaler (
-.rst_n(rstn_out)          ,			
-.scaler_clk(pixclk_in)     ,
-
-.pclk_in(pixclk_in)        ,
-.pix_data_in({r_in,g_in,b_in})    ,
-.vs_in(vs_in)          ,
-.hs_in(hs_in)          ,
-.de_in(de_in)          ,	
-
-.hdmi_en()         ,
-.hdmi_clk(pixclk_in)        ,
-.hdmi_req()        ,
-.hdmi_vs()         ,
-.hdmi_data()       
-   );
-
-
-wire [15:0] hdmi_rgb565;
-assign hdmi_rgb565 = {r_in[7:3],g_in[7:2],b_in[7:3]};
+wire [23:0] hdmi_rgb888;
+wire [23:0] ov_rgb888;
+assign hdmi_rgb888 = {r_in,g_in,b_in};
+assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9],i_rgb565[4:0],i_rgb565[4:2]};
 /* ddr buffer sig*/
 //修改ddr读写模块v1
     fram_buf#(
@@ -311,17 +291,18 @@ assign hdmi_rgb565 = {r_in[7:3],g_in[7:2],b_in[7:3]};
         .ddr_clk        (  core_clk             ),//input                         ddr_clk,
         .ddr_rstn       (  ddr_init_done        ),//input                         ddr_rstn,
         //data_in  
-/*        cmos_ov5640       720p                
-        .vin_clk        (  pclk_in_test         ),//input                         vin_clk,
-        .wr_fsync       (  vs_in_test           ),//input                         wr_fsync,
-        .wr_en          (  de_in_test           ),//input                         wr_en,
-        .wr_data        (  i_rgb565             ),//input  [15 : 0]  wr_data,
+/*        cmos_ov5640       720p     */           
+        .ov_vin_clk        (  pclk_in_test         ),//input                         vin_clk,
+        .ov_wr_fsync       (  vs_in_test           ),//input                         wr_fsync,
+        .ov_wr_en          (  de_in_test           ),//input                         wr_en,
+        .ov_wr_data        (  ov_rgb888             ),//input  [15 : 0]  wr_data,
 /**/
 /*        hdmi              1080p */           
-        .vin_clk        (  pixclk_in            ),//input                         vin_clk,
-        .wr_fsync       (  vs_in                ),//input                         wr_fsync,
-        .wr_en          (  de_in                ),//input                         wr_en,
-        .wr_data        (  hdmi_rgb565          ),//input  [15 : 0]  wr_data,
+        .hdmi_vin_clk        (  pixclk_in            ),//input                         vin_clk,
+        .hdmi_wr_fsync       (  vs_in                ),//input                         wr_fsync,
+        .hdmi_wr_hsync       (  hs_in                ),//input                         wr_fsync,
+        .hdmi_wr_en          (  de_in                ),//input                         wr_en,
+        .hdmi_wr_data        (  hdmi_rgb888          ),//input  [15 : 0]  wr_data,
 /**/
         //data_out
         .vout_clk       (  pix_clk              ),//input                         vout_clk,

@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 `define UD #1
-module wr_buf #(
+module wr_scale_buf #(
     parameter                     ADDR_WIDTH      = 6'd27,
     parameter                     ADDR_OFFSET     = 32'h0000_0000,
     parameter                     H_NUM           = 12'd1920,
@@ -104,7 +104,7 @@ module wr_buf #(
     reg [31 : 0]  write_data;
     reg [PIX_WIDTH- 1'b1 : 0]  wr_data_1d;
     reg                        write_en;
-
+    
 generate
     if(PIX_WIDTH == 6'd24)
     begin
@@ -186,7 +186,7 @@ endgenerate
     reg rd_pulse;
     always @(posedge wr_clk)
     begin
-        if(x_cnt > H_NUM - 5'd20  & wr_enable)
+        if(x_cnt > 960 - 5'd20  & wr_enable)
             rd_pulse <= 1'b1;
         else
             rd_pulse <= 1'b0; 
@@ -298,7 +298,7 @@ endgenerate
         if(rd_rst)
             rd_cnt <= 19'd0;
         else if(ddr_wdone)
-            rd_cnt <= rd_cnt + DDR_ADDR_OFFSET; // 640 | 960
+            rd_cnt <= rd_cnt + 960; // 640 | 960
         else
             rd_cnt <= rd_cnt;
     end 

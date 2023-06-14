@@ -30,10 +30,17 @@ module fram_buf #(
     parameter                     PIX_WIDTH            = 16//24 
 )(
     // ov5640 
-    input                         vin_clk,
-    input                         wr_fsync,
-    input                         wr_en,
-    input  [PIX_WIDTH- 1'b1 : 0]  wr_data,
+    input                         ov_vin_clk,
+    input                         ov_wr_fsync,
+    input                         ov_wr_hsync,
+    input                         ov_wr_en,
+    input  [24 - 1'b1 : 0]        ov_wr_data,
+    // hdmi 
+    input                         hdmi_vin_clk,
+    input                         hdmi_wr_fsync,
+    input                         hdmi_wr_hsync,
+    input                         hdmi_wr_en,
+    input  [24 - 1'b1 : 0]        hdmi_wr_data,
     output reg                    init_done=0,
     // ddr
     input                         ddr_clk,
@@ -43,7 +50,7 @@ module fram_buf #(
     input                         rd_fsync,
     input                         rd_en,
     output                        vout_de,
-    output [PIX_WIDTH- 1'b1 : 0]  vout_data,
+    output [PIX_WIDTH - 1'b1 : 0]  vout_data,
     
     output [CTRL_ADDR_WIDTH-1:0]  axi_awaddr     ,
     output [3:0]                  axi_awid       ,
@@ -59,7 +66,7 @@ module fram_buf #(
     output                        axi_wvalid     ,
     input                         axi_wready     ,
     input  [3 : 0]                axi_bid        ,
-                                                  
+
     output [CTRL_ADDR_WIDTH-1:0]  axi_araddr     ,
     output [3:0]                  axi_arid       ,
     output [3:0]                  axi_arlen      ,
@@ -67,7 +74,7 @@ module fram_buf #(
     output [1:0]                  axi_arburst    ,
     output                        axi_arvalid    ,
     input                         axi_arready    ,
-                                                  
+
     output                        axi_rready     ,
     input  [MEM_DQ_WIDTH*8-1:0]   axi_rdata      ,
     input                         axi_rvalid     ,
@@ -97,26 +104,81 @@ module fram_buf #(
     wire                        read_en     ;
     wire                        ddr_wr_bac;
 
-    wr_buf #(
+wire [23:0] hdmi_scale;
+wire [15:0] hdmi_scale_565;
+assign hdmi_scale_565 = {(hdmi_scale[23:19]), (hdmi_scale[15:10]), (hdmi_scale[7:3])};
+wire  hdmi_scaler_vld;
+scaler#(
+    .H(1920),
+    .V(1080),
+    .BP(41),
+    .H_SCALE(960),
+    .V_SCALE(540) 
+) hdmi_scaler(
+    .clk            (hdmi_vin_clk),
+    .rst_n          (ddr_rstn),
+    .hs_in          (hdmi_wr_hsync), 
+    .vs_in          (hdmi_wr_fsync), 
+    .de_in          (hdmi_wr_en),
+    .data_in        (hdmi_wr_data),
+    
+    .scaler_data_out         (hdmi_scale),
+    .scaler_data_vld         (hdmi_scaler_vld)
+);
+
+
+    wr_scale_buf #(
         .ADDR_WIDTH       (  CTRL_ADDR_WIDTH  ),//parameter                     ADDR_WIDTH      = 6'd27,
         .ADDR_OFFSET      (  32'd0            ),//parameter                     ADDR_OFFSET     = 32'h0000_0000,
-        .H_NUM            (  H_NUM            ),//parameter                     H_NUM           = 12'd1920,
-        .V_NUM            (  V_NUM            ),//parameter                     V_NUM           = 12'd1080,
+        .H_NUM            (  960            ),//parameter                     H_NUM           = 12'd1920,
+        .V_NUM            (  540            ),//parameter                     V_NUM           = 12'd1080,
         .DQ_WIDTH         (  MEM_DQ_WIDTH     ),//parameter                     DQ_WIDTH        = 7'd32,
         .LEN_WIDTH        (  LEN_WIDTH        ),//parameter                     LEN_WIDTH       = 6'd16,
         .PIX_WIDTH        (  PIX_WIDTH        ),//parameter                     PIX_WIDTH       = 6'd24,
         .LINE_ADDR_WIDTH  (  LINE_ADDR_WIDTH  ),//parameter                     LINE_ADDR_WIDTH = 4'd19,
         .FRAME_CNT_WIDTH  (  FRAME_CNT_WIDTH  ) //parameter                     FRAME_CNT_WIDTH = 4'd8
-    ) wr_buf (                                       
+    ) wr_scale_buf (                                       
+        .ddr_clk          (  ddr_clk          ),//input                         ddr_clk,
+        .ddr_rstn         (  ddr_rstn         ),//input                         ddr_rstn,
+
+        .wr_fsync         (  hdmi_wr_fsync         ),//input                         wr_fsync,                                  
+        .wr_clk           (  hdmi_vin_clk          ),//input                         wr_clk,
+        .wr_en            (  hdmi_scaler_vld            ),//input                         wr_en,
+        .wr_data          (  hdmi_scale_565     ),//input  [PIX_WIDTH- 1'b1 : 0]  wr_data,
+        
+        .rd_bac           (  ddr_wr_bac       ),//input                         rd_bac,                                      
+        .ddr_wreq         (  ddr_wreq         ),//output                        ddr_wreq,
+        .ddr_waddr        (  ddr_waddr        ),//output [ADDR_WIDTH- 1'b1 : 0] ddr_waddr,
+        .ddr_wr_len       (  ddr_wr_len       ),//output [LEN_WIDTH- 1'b1 : 0]  ddr_wr_len,
+        .ddr_wrdy         (  ddr_wrdy         ),//input                         ddr_wrdy,
+        .ddr_wdone        (  ddr_wdone        ),//input                         ddr_wdone,
+        .ddr_wdata        (  ddr_wdata        ),//output [8*DQ_WIDTH- 1'b1 : 0] ddr_wdata,
+        .ddr_wdata_req    (  ddr_wdata_req    ),//input                         ddr_wdata_req,
+
+        .frame_wcnt       (                   ),//output [FRAME_CNT_WIDTH-1 :0] frame_wcnt,
+        .frame_wirq       (  frame_wirq       ) //output                        frame_wirq
+    );
+
+    /*wr_buf #(
+        .ADDR_WIDTH       (  CTRL_ADDR_WIDTH  ),//parameter                     ADDR_WIDTH      = 6'd27,
+        .ADDR_OFFSET      (  32'd0            ),//parameter                     ADDR_OFFSET     = 32'h0000_0000,
+        .H_NUM            (  1280            ),//parameter                     H_NUM           = 12'd1920,
+        .V_NUM            (  720            ),//parameter                     V_NUM           = 12'd1080,
+        .DQ_WIDTH         (  MEM_DQ_WIDTH     ),//parameter                     DQ_WIDTH        = 7'd32,
+        .LEN_WIDTH        (  LEN_WIDTH        ),//parameter                     LEN_WIDTH       = 6'd16,
+        .PIX_WIDTH        (  PIX_WIDTH        ),//parameter                     PIX_WIDTH       = 6'd24,
+        .LINE_ADDR_WIDTH  (  LINE_ADDR_WIDTH  ),//parameter                     LINE_ADDR_WIDTH = 4'd19,
+        .FRAME_CNT_WIDTH  (  FRAME_CNT_WIDTH  ) //parameter                     FRAME_CNT_WIDTH = 4'd8
+    ) ov_wr_buf (                                       
         .ddr_clk          (  ddr_clk          ),//input                         ddr_clk,
         .ddr_rstn         (  ddr_rstn         ),//input                         ddr_rstn,
                                               
-        .wr_clk           (  vin_clk          ),//input                         wr_clk,
-        .wr_fsync         (  wr_fsync         ),//input                         wr_fsync,
-        .wr_en            (  wr_en            ),//input                         wr_en,
-        .wr_data          (  wr_data          ),//input  [PIX_WIDTH- 1'b1 : 0]  wr_data,
+        .wr_clk           (  ov_vin_clk          ),//input                         wr_clk,
+        .wr_fsync         (  ov_wr_fsync         ),//input                         wr_fsync,
+        .wr_en            (  ov_wr_en            ),//input                         wr_en,
+        .wr_data          (  ov_rgb565          ),//input  [PIX_WIDTH- 1'b1 : 0]  wr_data,
         
-        .rd_bac           (  ddr_wr_bac       ),//input                         rd_bac,                                      
+        .rd_bac           (  ddr_wr_bac       ),//input                         rd_bac,
         .ddr_wreq         (  ddr_wreq         ),//output                        ddr_wreq,
         .ddr_waddr        (  ddr_waddr        ),//output [ADDR_WIDTH- 1'b1 : 0] ddr_waddr,
         .ddr_wr_len       (  ddr_wr_len       ),//output [LEN_WIDTH- 1'b1 : 0]  ddr_wr_len,
@@ -127,7 +189,7 @@ module fram_buf #(
                                               
         .frame_wcnt       (                   ),//output [FRAME_CNT_WIDTH-1 :0] frame_wcnt,
         .frame_wirq       (  frame_wirq       ) //output                        frame_wirq
-    );
+    );*/
     
     always @(posedge ddr_clk)
     begin
