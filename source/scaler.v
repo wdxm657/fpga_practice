@@ -1,39 +1,26 @@
 module scaler #(
    parameter H = 1920,
    parameter V = 1080,
-   parameter BP = 41,
    parameter H_SCALE = 960,
    parameter V_SCALE = 540
 )(
    input clk,
    input rst_n,
-   input hs_in,
    input vs_in,
    input de_in,
    input [23:0] data_in, 
 
-   output [23:0] scaler_data_out,
-   output scaler_data_vld
+   output [23:0] scaler_data_out,/*synthesis PAP_MARK_DEBUG="1"*/
+   output scaler_data_vld /*synthesis PAP_MARK_DEBUG="1"*/
    );
 
-wire frame_start;
-frame_start_ctrl #(
- .VSYNC_PLUS_VBP  ( BP   ) 
-) hdmi_frame_start_ctrl (
-.clk         ( clk  ),
-.rst_n       ( rst_n       ),
-.vs_in       ( vs_in       ),
-.hs_in       ( hs_in       ),
-.frame_start ( frame_start )
-);
-
-wire                          fifo_rst          /* synthesis syn_keep = 1 */;
-wire                          rd_en             /* synthesis syn_keep = 1 */;
-reg                           rd_en_r0          /* synthesis syn_keep = 1 */;
-wire                          rd_empty          /* synthesis syn_keep = 1 */;
-wire[24-1:0]                  rd_data           /* synthesis syn_keep = 1 */;
+wire                          fifo_rst          ;/*synthesis PAP_MARK_DEBUG="1"*/
+wire                          rd_en             ;/*synthesis PAP_MARK_DEBUG="1"*/
+reg                           rd_en_r0          ;/*synthesis PAP_MARK_DEBUG="1"*/
+wire                          rd_empty          ;/*synthesis PAP_MARK_DEBUG="1"*/
+wire[24-1:0]                  rd_data           ;/*synthesis PAP_MARK_DEBUG="1"*/
 assign   rd_en     = wr_ready && ~rd_empty ;
-assign   fifo_rst  = ~rst_n || frame_start ;
+assign   fifo_rst  = ~rst_n || vs_in ;
 drm_fifo24to24  drm_fifo24to24_scaler_in (
   .wr_clk        (  clk      ),     
   .wr_rst        (  fifo_rst     ),     
@@ -50,8 +37,8 @@ drm_fifo24to24  drm_fifo24to24_scaler_in (
   .almost_empty  (              )   
 );
 
-reg [ 24-1:0]                 pixel_din         /* synthesis syn_keep = 1 */;
-reg                           pixel_din_vld     /* synthesis syn_keep = 1 */;
+reg [ 24-1:0]                 pixel_din         ;/*synthesis PAP_MARK_DEBUG="1"*/
+reg                           pixel_din_vld     ;/*synthesis PAP_MARK_DEBUG="1"*/
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
 				rd_en_r0 <= 0;
@@ -101,7 +88,7 @@ scaler_bilinear #(
   .pixel_din           ( pixel_din        ), //pixel input 
   .pixel_din_vld       ( pixel_din_vld    ), //pixel input valid  
   .wr_ready            ( wr_ready         ), //output,write enable 
-  .frame_start         ( frame_start      ), //frame sync input 
+  .frame_start         ( vs_in      ), //frame sync input 
   //read port                      
   .pixel_dout          ( scaler_data_out  ), //pixel output 
   .pixel_dout_vld      ( scaler_data_vld  ), //pixel output valid 

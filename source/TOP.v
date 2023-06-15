@@ -77,19 +77,19 @@ module TOP#(
     inout                                iic_tx_sda                ,
     output                               hdmi_int_led              ,//HDMI_OUT初始化完成
 //HDMI_IN
-    input             pixclk_in/*synthesis PAP_MARK_DEBUG="1"*/,                            
-    input             vs_in    /*synthesis PAP_MARK_DEBUG="1"*/, 
-    input             hs_in    /*synthesis PAP_MARK_DEBUG="1"*/, 
-    input             de_in    /*synthesis PAP_MARK_DEBUG="1"*/,
-    input     [7:0]   r_in     /*synthesis PAP_MARK_DEBUG="1"*/, 
+    input             pixclk_in,                            
+    input             vs_in    , 
+    input             hs_in    , 
+    input             de_in    ,
+    input     [7:0]   r_in     , 
     input     [7:0]   g_in     , 
     input     [7:0]   b_in     ,  
 //HDMI_OUT
-    output                               pix_clk_1080p               /*synthesis PAP_MARK_DEBUG="1"*/,              
-    output                               vs_out                   /*synthesis PAP_MARK_DEBUG="1"*/, 
-    output                               hs_out                   /*synthesis PAP_MARK_DEBUG="1"*/, 
-    output                               de_out                   /*synthesis PAP_MARK_DEBUG="1"*/, 
-    output        [7:0]                  r_out                    /*synthesis PAP_MARK_DEBUG="1"*/, 
+    output                               pix_clk_1080p            /*synthesis PAP_MARK_DEBUG="1"*/,              
+    output                               vs_out                   , 
+    output                               hs_out                   , 
+    output                               de_out                   , 
+    output        [7:0]                  r_out                    , 
     output        [7:0]                  g_out                    , 
     output        [7:0]                  b_out                      
 );
@@ -114,12 +114,12 @@ module TOP#(
     reg                         cmos1_href_d0       ;
     reg                         cmos1_vsync_d0      ;
     wire                        cmos1_pclk_16bit    ;
-    wire[15:0]                  cmos2_d_16bit       /*synthesis PAP_MARK_DEBUG="1"*/;
-    wire                        cmos2_href_16bit    /*synthesis PAP_MARK_DEBUG="1"*/;
-    reg [7:0]                   cmos2_d_d0          /*synthesis PAP_MARK_DEBUG="1"*/;
-    reg                         cmos2_href_d0       /*synthesis PAP_MARK_DEBUG="1"*/;
-    reg                         cmos2_vsync_d0      /*synthesis PAP_MARK_DEBUG="1"*/;
-    wire                        cmos2_pclk_16bit    /*synthesis PAP_MARK_DEBUG="1"*/;
+    wire[15:0]                  cmos2_d_16bit       ;
+    wire                        cmos2_href_16bit    ;
+    reg [7:0]                   cmos2_d_d0          ;
+    reg                         cmos2_href_d0       ;
+    reg                         cmos2_vsync_d0      ;
+    wire                        cmos2_pclk_16bit    ;
     wire[15:0]                  o_rgb565            ;
     wire                        pclk_in_test        ;    
     wire                        vs_in_test          ;
@@ -133,19 +133,19 @@ module TOP#(
     wire [3:0]                  axi_awuser_id              ;
     wire [3:0]                  axi_awlen                  ;
     wire                        axi_awready                ;/*synthesis PAP_MARK_DEBUG="1"*/
-    wire                        axi_awvalid                ;/*synthesis PAP_MARK_DEBUG="1"*/
+    wire                        axi_awvalid                ;
     wire [MEM_DQ_WIDTH*8-1:0]   axi_wdata                  ;
     wire [MEM_DQ_WIDTH*8/8-1:0] axi_wstrb                  ;
-    wire                        axi_wready                 ;/*synthesis PAP_MARK_DEBUG="1"*/
+    wire                        axi_wready                 ;
     wire [3:0]                  axi_wusero_id              ;
     wire                        axi_wusero_last            ;
     wire [CTRL_ADDR_WIDTH-1:0]  axi_araddr                 ;
     wire                        axi_aruser_ap              ;
     wire [3:0]                  axi_aruser_id              ;
     wire [3:0]                  axi_arlen                  ;
-    wire                        axi_arready                ;/*synthesis PAP_MARK_DEBUG="1"*/
-    wire                        axi_arvalid                ;/*synthesis PAP_MARK_DEBUG="1"*/
-    wire [MEM_DQ_WIDTH*8-1:0]   axi_rdata                   /* synthesis syn_keep = 1 */;
+    wire                        axi_arready                ;
+    wire                        axi_arvalid                ;
+    wire [MEM_DQ_WIDTH*8-1:0]   axi_rdata                  ;
     wire                        axi_rvalid                  /* synthesis syn_keep = 1 */;
     wire [3:0]                  axi_rid                    ;
     wire                        axi_rlast                  ;
@@ -300,7 +300,6 @@ assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9
 /*        hdmi              1080p */           
         .hdmi_vin_clk        (  pixclk_in            ),//input                         vin_clk,
         .hdmi_wr_fsync       (  vs_in                ),//input                         wr_fsync,
-        .hdmi_wr_hsync       (  hs_in                ),//input                         wr_fsync,
         .hdmi_wr_en          (  de_in                ),//input                         wr_en,
         .hdmi_wr_data        (  hdmi_rgb888          ),//input  [15 : 0]  wr_data,
 /**/

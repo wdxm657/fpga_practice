@@ -39,8 +39,6 @@ module rd_buf #(
     output                        vout_de,
     output [PIX_WIDTH- 1'b1 : 0]  vout_data,
     
-    input                         init_done,
-    
     output                        ddr_rreq,
     output [ADDR_WIDTH- 1'b1 : 0] ddr_raddr,
     output [LEN_WIDTH- 1'b1 : 0]  ddr_rd_len,
