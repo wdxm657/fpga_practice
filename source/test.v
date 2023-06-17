@@ -9,8 +9,9 @@ module test #(
     input ddr_rstn,
     input [PIX_WIDTH-1:0] wr_data,
     input ddr_wdone,
+    output reg cur_frame=0,
     output reg ddr_rstn_2d,
-    output  ddr_frame_done,
+    output reg ddr_frame_done=0,/*synthesis PAP_MARK_DEBUG="1"*/
     output rd_pulse,
     output     reg [11:0]                 wr_addr=0,
     output     reg                        write_en,
@@ -83,7 +84,35 @@ module test #(
             x_cnt <= 12'd0;
     end 
     
-    assign ddr_frame_done = (y_cnt == V_NUM - 1) & ddr_wdone;
+    reg last_frame = 1'b0;/*synthesis PAP_MARK_DEBUG="1"*/
+    always @(posedge wr_clk)
+    begin
+        if(wr_rst) 
+            last_frame <= 1;
+        else if(wait_next) last_frame <= 0;
+    end 
+
+    reg wait_next = 1'b0;/*synthesis PAP_MARK_DEBUG="1"*/
+    always @(posedge wr_clk)
+    begin
+        if(ddr_wdone & last_frame) 
+            wait_next <= 1;
+        else if(cur_frame) wait_next <= 0;
+    end
+
+    always @(posedge wr_clk)
+    begin
+        if(wait_next & wr_rst) 
+            cur_frame <= 1;
+        else if(ddr_frame_done) cur_frame <= 0;
+    end
+
+    always @(posedge wr_clk)
+    begin
+        if(y_cnt == V_NUM - 1 & ddr_wdone & cur_frame)
+            ddr_frame_done <= 1;
+        else ddr_frame_done <= 0;
+    end 
     always @(posedge wr_clk)
     begin 
         if(wr_rst)
@@ -98,7 +127,7 @@ module test #(
     reg rd_pulse;
     always @(posedge wr_clk)
     begin
-        if(x_cnt > H_NUM - 5'd20  & wr_enable)
+        if(x_cnt > H_NUM - 5'd20  & wr_enable & ~wait_next)
             rd_pulse <= 1'b1;
         else
             rd_pulse <= 1'b0; 

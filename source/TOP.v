@@ -341,6 +341,19 @@ assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9
 //产生visa时序 
      sync_vg #(
 //MODE_1080p
+    /*.V_TOTAL   (12'd1125),
+    .V_FP      (12'd4   ),
+    .V_BP      (12'd36  ),
+    .V_SYNC    (12'd5   ),
+    .V_ACT     (12'd1080),
+    .H_TOTAL   (12'd2200),
+    .H_FP      (12'd88  ),
+    .H_BP      (12'd148 ),
+    .H_SYNC    (12'd44  ),
+    .H_ACT     (12'd1920),
+    .HV_OFFSET (12'd0   ) 
+    )*/    
+//MODE_1080p
     .V_TOTAL   (12'd1125),
     .V_FP      (12'd4   ),
     .V_BP      (12'd36  ),
@@ -352,7 +365,7 @@ assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9
     .H_SYNC    (12'd44  ),
     .H_ACT     (12'd1920),
     .HV_OFFSET (12'd0   ) 
-    )    
+    ) 
      sync_vg(                            
         .clk            (  pix_clk              ),//input                   clk,                                 
         .rstn           (  init_done            ),//input                   rstn,                            
