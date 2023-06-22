@@ -111,7 +111,7 @@ module testt #(
         if(rd_rst)
             rd_cnt <= OFFSET;
         else if(ddr_wdone)
-            rd_cnt <= rd_cnt + 960; // 960 | 480
+            rd_cnt <= rd_cnt + 640; // 960 | 480
         else
             rd_cnt <= rd_cnt;
     end 

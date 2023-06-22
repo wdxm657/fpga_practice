@@ -85,18 +85,30 @@ module TOP#(
     input     [7:0]   g_in     , 
     input     [7:0]   b_in     ,  
 //HDMI_OUT
-    output                               pix_clk_1080p            /*synthesis PAP_MARK_DEBUG="1"*/,              
+    output                               pix_clk_out            /*synthesis PAP_MARK_DEBUG="1"*/,              
     output                               vs_out                   , 
     output                               hs_out                   , 
     output                               de_out                   , 
     output        [7:0]                  r_out                    , 
     output        [7:0]                  g_out                    , 
-    output        [7:0]                  b_out                      
+    output        [7:0]                  b_out                    ,
+//PCIE
+    input                       button_rst_n    ,
+    input                       perst_n         ,
+    input                       pcie_ref_clk_n  ,
+    input                       pcie_ref_clk_p  ,
+    input           [1:0]       rxn             ,
+    input           [1:0]       rxp             ,
+    output  wire    [1:0]       txn             ,
+    output  wire    [1:0]       txp         
 );
 /////////////////////////////////////////////////////////////////////////////////////
 // ENABLE_DDR
     parameter CTRL_ADDR_WIDTH = MEM_ROW_ADDR_WIDTH + MEM_BADDR_WIDTH + MEM_COL_ADDR_WIDTH;//28
     parameter TH_1S = 27'd33000000;
+// PCIE
+localparam  DEVICE_TYPE   = 3'b000;//@IPC enum 3'b000,3'b001,3'b100
+localparam AXIS_SLAVE_NUM = 3      ;  //@IPC enum 1 2 3
 /////////////////////////////////////////////////////////////////////////////////////
     reg  [15:0]                 rstn_1ms            ;
 
@@ -282,11 +294,15 @@ wire [23:0] hdmi_rgb888;
 wire [23:0] ov_rgb888;
 assign hdmi_rgb888 = {r_in,g_in,b_in};
 assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9],i_rgb565[4:0],i_rgb565[4:2]};
+wire i_pcie_mwr_en;
+wire [127:0] o_ddr_data;
+wire cpld_data_valid;
+wire [127:0] axis_rx_data;
 /* ddr buffer sig*/
 //修改ddr读写模块v1
     fram_buf#(
-    .H_NUM (1920),
-    .V_NUM (1080)
+    .H_NUM (1280),
+    .V_NUM (720)
     ) fram_buf(
         .ddr_clk        (  core_clk             ),//input                         ddr_clk,
         .ddr_rstn       (  ddr_init_done        ),//input                         ddr_rstn,
@@ -303,12 +319,23 @@ assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9
         .hdmi_wr_en          (  de_in                ),//input                         wr_en,
         .hdmi_wr_data        (  hdmi_rgb888          ),//input  [15 : 0]  wr_data,
 /**/
+        //pcie
+
+        .pcie_clk        (pcie_pclk_div2),
+        .pcie_init_done  (pcie_init_done),
+        .cpu_rd_en       (i_pcie_mwr_en),
+        .cpu_rd_data     (o_ddr_data),
+        
+        .cpu_wr_en         (cpld_data_valid),
+        .cpu_wr_data       (axis_rx_data),
+
         //data_out
         .vout_clk       (  pix_clk              ),//input                         vout_clk,
         .rd_fsync       (  vs_o               ),//input                         rd_fsync,
         .rd_en          (  de_re                ),//input                         rd_en, 
         .vout_de        (  de_o               ),//output                        vout_de,
         .vout_data      (  o_rgb565             ),//output [PIX_WIDTH- 1'b1 : 0]  vout_data,
+
         .init_done      (  init_done            ),//output reg                    init_done,
         //axi bus
         .axi_awaddr     (  axi_awaddr           ),// output[27:0]
@@ -339,20 +366,7 @@ assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9
     );
 /////////////////////////////////////////////////////////////////////////////////////
 //产生visa时序 
-     sync_vg #(
-//MODE_1080p
-    /*.V_TOTAL   (12'd1125),
-    .V_FP      (12'd4   ),
-    .V_BP      (12'd36  ),
-    .V_SYNC    (12'd5   ),
-    .V_ACT     (12'd1080),
-    .H_TOTAL   (12'd2200),
-    .H_FP      (12'd88  ),
-    .H_BP      (12'd148 ),
-    .H_SYNC    (12'd44  ),
-    .H_ACT     (12'd1920),
-    .HV_OFFSET (12'd0   ) 
-    )*/    
+     sync_vg /*#(
 //MODE_1080p
     .V_TOTAL   (12'd1125),
     .V_FP      (12'd4   ),
@@ -365,7 +379,7 @@ assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9
     .H_SYNC    (12'd44  ),
     .H_ACT     (12'd1920),
     .HV_OFFSET (12'd0   ) 
-    ) 
+    ) */
      sync_vg(                            
         .clk            (  pix_clk              ),//input                   clk,                                 
         .rstn           (  init_done            ),//input                   rstn,                            
@@ -384,7 +398,7 @@ assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9
         hs_o_d1<=hs_o;
         hs_o_d2<=hs_o_d1;
      end
-    assign pix_clk_1080p   =  pix_clk    ;
+    assign pix_clk_out   =  pix_clk    ;
     assign r_out = {o_rgb565[15:11],o_rgb565[15:13]   };
     assign g_out = {o_rgb565[10:5],o_rgb565[10:9]    };
     assign b_out = {o_rgb565[4:0],o_rgb565[4:2]    };
@@ -394,9 +408,9 @@ assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9
 /**/
 
 /* hdmi out = hdmi in
-assign pix_clk_1080p   =  pixclk_in    ;
+assign pix_clk_out   =  pixclk_in    ;
 
-    always  @(posedge pix_clk_1080p)begin
+    always  @(posedge pix_clk_out)begin
         if(!init_over_tx)begin
             vs_out       <=  1'b0        ;
             hs_out       <=  1'b0        ;
@@ -506,6 +520,323 @@ assign pix_clk_1080p   =  pixclk_in    ;
         else if ( cnt >= TH_1S )
             heart_beat_led <= ~heart_beat_led;
     end
-                 
+      
+
+// pcie wire sigs
+wire pcie_ref_clk;
+wire pcie_pclk;
+wire pcie_pclk_div2;
+wire sync_perst_n;
+wire            pcie_cfg_ctrl_en        ;
+wire            axis_master_tready_cfg  ;
+
+wire            cfg_axis_slave0_tvalid  ;
+wire    [127:0] cfg_axis_slave0_tdata   ;
+wire            cfg_axis_slave0_tlast   ;
+wire            cfg_axis_slave0_tuser   ;
+
+//for mux
+wire            axis_master_tready_mem  ;
+wire            axis_master_tvalid_mem  ;
+wire    [127:0] axis_master_tdata_mem   ;
+wire    [3:0]   axis_master_tkeep_mem   ;
+wire            axis_master_tlast_mem   ;
+wire    [7:0]   axis_master_tuser_mem   ;
+
+wire            cross_4kb_boundary      ;
+
+wire            dma_axis_slave0_tvalid  ;
+wire    [127:0] dma_axis_slave0_tdata   ;
+wire            dma_axis_slave0_tlast   ;
+wire            dma_axis_slave0_tuser   ;
+
+//RESET DEBOUNCE and SYNC
+wire            sync_button_rst_n       ;
+wire            s_pclk_rstn             ;
+wire            s_pclk_div2_rstn        ;
+
+//********************** internal signal
+//AXIS master interface
+wire            axis_master_tvalid      ;
+wire            axis_master_tready      ;
+wire    [127:0] axis_master_tdata       ;
+wire    [3:0]   axis_master_tkeep       ;
+wire            axis_master_tlast       ;
+wire    [7:0]   axis_master_tuser       ;
+
+//axis slave 0 interface
+wire            axis_slave0_tready      ;
+wire            axis_slave0_tvalid      ;
+wire    [127:0] axis_slave0_tdata       ;
+wire            axis_slave0_tlast       ;
+wire            axis_slave0_tuser       ;
+
+//axis slave 1 interface
+wire            axis_slave1_tready      ;
+wire            axis_slave1_tvalid      ;
+wire    [127:0] axis_slave1_tdata       ;
+wire            axis_slave1_tlast       ;
+wire            axis_slave1_tuser       ;
+
+//axis slave 2 interface
+wire            axis_slave2_tready      ;
+wire            axis_slave2_tvalid      ;
+wire    [127:0] axis_slave2_tdata       ;
+wire            axis_slave2_tlast       ;
+wire            axis_slave2_tuser       ;
+wire    [7:0]   cfg_pbus_num            ;
+wire    [4:0]   cfg_pbus_dev_num        ;
+wire    [2:0]   cfg_max_rd_req_size     ;
+wire    [2:0]   cfg_max_payload_size    ;
+wire            cfg_rcb                 ;
+
+wire            cfg_ido_req_en          ;
+wire            cfg_ido_cpl_en          ;
+wire    [7:0]   xadm_ph_cdts            ;
+wire    [11:0]  xadm_pd_cdts            ;
+wire    [7:0]   xadm_nph_cdts           ;
+wire    [11:0]  xadm_npd_cdts           ;
+wire    [7:0]   xadm_cplh_cdts          ;
+wire    [11:0]  xadm_cpld_cdts          ;
+
+assign cfg_ido_req_en   =   1'b0;
+assign cfg_ido_cpl_en   =   1'b0;
+assign xadm_ph_cdts     =   8'b0;
+assign xadm_pd_cdts     =   12'b0;
+assign xadm_nph_cdts    =   8'b0;
+assign xadm_npd_cdts    =   12'b0;
+assign xadm_cplh_cdts   =   8'b0;
+assign xadm_cpld_cdts   =   12'b0;
+
+// pcie dma -----------------------------------------------------------
+//ipsl_pcie_dma #(
+//    .DEVICE_TYPE            (DEVICE_TYPE            ),
+//    .AXIS_SLAVE_NUM         (AXIS_SLAVE_NUM         )
+//)
+//u_ipsl_pcie_dma
+//(
+//    .clk                    (pcie_pclk_div2              ),  //gen1:62.5MHz,gen2:125MHz
+//    .rst_n                  (core_rst_n             ),
+//
+//    // fpga 2 cpu
+//    .o_pcie_mwr_en          (i_pcie_mwr_en)           ,
+//    .i_ddr_data             (o_ddr_data)              ,
+//    
+//    // cpu 2 fpga
+//    .o_cpld_data_valid       (cpld_data_valid),
+//    .axis_rx_data            (axis_rx_data),
+//
+//    //num
+//    .i_cfg_pbus_num         (cfg_pbus_num           ),  //input [7:0]
+//    .i_cfg_pbus_dev_num     (cfg_pbus_dev_num       ),  //input [4:0]
+//    .i_cfg_max_rd_req_size  (cfg_max_rd_req_size    ),  //input [2:0]
+//    .i_cfg_max_payload_size (cfg_max_payload_size   ),  //input [2:0]
+//    //**********************************************************************
+//    //axis master interface
+//    .i_axis_master_tvld     (axis_master_tvalid_mem ),
+//    .o_axis_master_trdy     (axis_master_tready_mem ),
+//    .i_axis_master_tdata    (axis_master_tdata_mem  ),
+//    .i_axis_master_tkeep    (axis_master_tkeep_mem  ),
+//    .i_axis_master_tlast    (axis_master_tlast_mem  ),
+//    .i_axis_master_tuser    (axis_master_tuser_mem  ),
+//
+//    //**********************************************************************
+//    //axis_slave0 interface
+//    .i_axis_slave0_trdy     (axis_slave0_tready     ),
+//    .o_axis_slave0_tvld     (dma_axis_slave0_tvalid ),
+//    .o_axis_slave0_tdata    (dma_axis_slave0_tdata  ),
+//    .o_axis_slave0_tlast    (dma_axis_slave0_tlast  ),
+//    .o_axis_slave0_tuser    (dma_axis_slave0_tuser  ),
+//    //axis_slave1 interface
+//    .i_axis_slave1_trdy     (axis_slave1_tready     ),
+//    .o_axis_slave1_tvld     (axis_slave1_tvalid     ),
+//    .o_axis_slave1_tdata    (axis_slave1_tdata      ),
+//    .o_axis_slave1_tlast    (axis_slave1_tlast      ),
+//    .o_axis_slave1_tuser    (axis_slave1_tuser      ),
+//    //axis_slave2 interface
+//    .i_axis_slave2_trdy     (axis_slave2_tready     ),
+//    .o_axis_slave2_tvld     (axis_slave2_tvalid     ),
+//    .o_axis_slave2_tdata    (axis_slave2_tdata      ),
+//    .o_axis_slave2_tlast    (axis_slave2_tlast      ),
+//    .o_axis_slave2_tuser    (axis_slave2_tuser      ),
+//    //from pcie
+//    .i_cfg_ido_req_en       (cfg_ido_req_en         ),
+//    .i_cfg_ido_cpl_en       (cfg_ido_cpl_en         ),
+//    .i_xadm_ph_cdts         (xadm_ph_cdts           ),
+//    .i_xadm_pd_cdts         (xadm_pd_cdts           ),
+//    .i_xadm_nph_cdts        (xadm_nph_cdts          ),
+//    .i_xadm_npd_cdts        (xadm_npd_cdts          ),
+//    .i_xadm_cplh_cdts       (xadm_cplh_cdts         ),
+//    .i_xadm_cpld_cdts       (xadm_cpld_cdts         )
+//);
+//
+////----------------------------------------------------------rst debounce ----------------------------------------------------------
+////ASYNC RST  define IPSL_PCIE_SPEEDUP_SIM when simulation
+//hsst_rst_cross_sync_v1_0 #(
+//    `ifdef IPSL_PCIE_SPEEDUP_SIM
+//    .RST_CNTR_VALUE     (16'h10             )
+//    `else
+//    .RST_CNTR_VALUE     (16'hC000           )
+//    `endif
+//)
+//u_refclk_buttonrstn_debounce(
+//    .clk                (pcie_ref_clk            ),
+//    .rstn_in            (button_rst_n       ),
+//    .rstn_out           (sync_button_rst_n  )
+//);
+//
+//hsst_rst_cross_sync_v1_0 #(
+//    `ifdef IPSL_PCIE_SPEEDUP_SIM
+//    .RST_CNTR_VALUE     (16'h10             )
+//    `else
+//    .RST_CNTR_VALUE     (16'hC000           )
+//    `endif
+//)
+//u_refclk_perstn_debounce(
+//    .clk                (pcie_ref_clk            ),
+//    .rstn_in            (perst_n            ),
+//    .rstn_out           (sync_perst_n       )
+//);
+//
+//ipsl_pcie_sync_v1_0  u_ref_core_rstn_sync    (
+//    .clk                (pcie_ref_clk            ),
+//    .rst_n              (core_rst_n         ),
+//    .sig_async          (1'b1               ),
+//    .sig_synced         (ref_core_rst_n     )
+//);
+//
+//ipsl_pcie_sync_v1_0  u_pclk_core_rstn_sync   (
+//    .clk                (pcie_pclk               ),
+//    .rst_n              (core_rst_n         ),
+//    .sig_async          (1'b1               ),
+//    .sig_synced         (s_pclk_rstn        )
+//);
+//
+//ipsl_pcie_sync_v1_0  u_pclk_div2_core_rstn_sync   (
+//    .clk                (pcie_pclk_div2          ),
+//    .rst_n              (core_rst_n         ),
+//    .sig_async          (1'b1               ),
+//    .sig_synced         (s_pclk_div2_rstn   )
+//);
+//
+//assign axis_slave0_tvalid      = dma_axis_slave0_tvalid;
+//assign axis_slave0_tlast       = dma_axis_slave0_tlast;
+//assign axis_slave0_tuser       = dma_axis_slave0_tuser;
+//assign axis_slave0_tdata       = dma_axis_slave0_tdata;
+//
+//assign axis_master_tvalid_mem  = axis_master_tvalid;
+//assign axis_master_tdata_mem   = axis_master_tdata;
+//assign axis_master_tkeep_mem   = axis_master_tkeep;
+//assign axis_master_tlast_mem   = axis_master_tlast;
+//assign axis_master_tuser_mem   = axis_master_tuser;
+//
+//assign axis_master_tready      = axis_master_tready_mem;
+//wire pcie_init_done;
+//wire smlh_link_up;
+//wire rdlh_link_up;
+//assign pcie_init_done = smlh_link_up & rdlh_link_up;
+//
+//// pcie warp -----------------------------------------------------------
+//ip_pcie my_pcie (
+//  .free_clk                     (sys_clk)          ,// input
+//  .pclk                         (pcie_pclk)              ,// output
+//  .pclk_div2                    (pcie_pclk_div2)         ,// output
+//  .ref_clk                      (pcie_ref_clk)           ,// output
+//  .ref_clk_n                    (pcie_ref_clk_n)         ,// input
+//  .ref_clk_p                    (pcie_ref_clk_p)         ,// input
+//
+//  .button_rst_n                 (sync_button_rst_n)           ,// input
+//  .power_up_rst_n               (sync_perst_n)         ,// input
+//  .perst_n                      (sync_perst_n)                ,// input
+//
+//  .core_rst_n                   (core_rst_n)             ,// output
+//
+//  //PHY diff signals
+//    .rxn                        (rxn                    ),      //input   max[3:0]
+//    .rxp                        (rxp                    ),      //input   max[3:0]
+//    .txn                        (txn                    ),      //output  max[3:0]
+//    .txp                        (txp                    ),      //output  max[3:0]
+//    
+//    .pcs_nearend_loop           ({2{1'b0}}              ),      //input
+//    .pma_nearend_ploop          ({2{1'b0}}              ),      //input
+//    .pma_nearend_sloop          ({2{1'b0}}              ),      //input
+//    
+//    //AXIS master interface
+//    .axis_master_tvalid         (axis_master_tvalid     ),      //output
+//    .axis_master_tready         (axis_master_tready     ),      //input
+//    .axis_master_tdata          (axis_master_tdata      ),      //output [127:0]
+//    .axis_master_tkeep          (axis_master_tkeep      ),      //output [3:0]
+//    .axis_master_tlast          (axis_master_tlast      ),      //output
+//    .axis_master_tuser          (axis_master_tuser      ),      //output [7:0]
+//    
+//    //axis slave 0 interface
+//    .axis_slave0_tready         (axis_slave0_tready     ),      //output
+//    .axis_slave0_tvalid         (axis_slave0_tvalid     ),      //input
+//    .axis_slave0_tdata          (axis_slave0_tdata      ),      //input  [127:0]
+//    .axis_slave0_tlast          (axis_slave0_tlast      ),      //input
+//    .axis_slave0_tuser          (axis_slave0_tuser      ),      //input
+//    
+//    //axis slave 1 interface
+//    .axis_slave1_tready         (axis_slave1_tready     ),      //output
+//    .axis_slave1_tvalid         (axis_slave1_tvalid     ),      //input
+//    .axis_slave1_tdata          (axis_slave1_tdata      ),      //input  [127:0]
+//    .axis_slave1_tlast          (axis_slave1_tlast      ),      //input
+//    .axis_slave1_tuser          (axis_slave1_tuser      ),      //input
+//    //axis slave 2 interface
+//    .axis_slave2_tready         (axis_slave2_tready     ),      //output
+//    .axis_slave2_tvalid         (axis_slave2_tvalid     ),      //input
+//    .axis_slave2_tdata          (axis_slave2_tdata      ),      //input  [127:0]
+//    .axis_slave2_tlast          (axis_slave2_tlast      ),      //input
+//    .axis_slave2_tuser          (axis_slave2_tuser      ),      //input
+//     
+//    .pm_xtlh_block_tlp          (                       ),      //output
+//    
+//    .cfg_send_cor_err_mux       (                       ),      //output
+//    .cfg_send_nf_err_mux        (                       ),      //output
+//    .cfg_send_f_err_mux         (                       ),      //output
+//    .cfg_sys_err_rc             (                       ),      //output
+//    .cfg_aer_rc_err_mux         (                       ),      //output
+//    //radm timeout
+//    .radm_cpl_timeout           (                       ),      //output
+//    
+//    //configuration signals
+//    .cfg_max_rd_req_size        (cfg_max_rd_req_size    ),      //output [2:0]
+//    .cfg_bus_master_en          (                       ),      //output
+//    .cfg_max_payload_size       (cfg_max_payload_size   ),      //output [2:0]
+//    .cfg_ext_tag_en             (                       ),      //output
+//    .cfg_rcb                    (/*cfg_rcb*/            ),      //output
+//    .cfg_mem_space_en           (                       ),      //output
+//    .cfg_pm_no_soft_rst         (                       ),      //output
+//    .cfg_crs_sw_vis_en          (                       ),      //output
+//    .cfg_no_snoop_en            (                       ),      //output
+//    .cfg_relax_order_en         (                       ),      //output
+//    .cfg_tph_req_en             (                       ),      //output [2-1:0]
+//    .cfg_pf_tph_st_mode         (                       ),      //output [3-1:0]
+//    .rbar_ctrl_update           (                       ),      //output
+//    .cfg_atomic_req_en          (                       ),      //output
+//    
+//    .cfg_pbus_num               (cfg_pbus_num           ),      //output [7:0]
+//    .cfg_pbus_dev_num           (cfg_pbus_dev_num       ),      //output [4:0]
+//    
+//    //debug signals
+//    .radm_idle                  (                       ),      //output
+//    .radm_q_not_empty           (                       ),      //output
+//    .radm_qoverflow             (                       ),      //output
+//    .diag_ctrl_bus              (2'b0                   ),      //input   [1:0]
+//    .cfg_link_auto_bw_mux       (                       ),      //output              merge cfg_link_auto_bw_msi and cfg_link_auto_bw_int
+//    .cfg_bw_mgt_mux             (                       ),      //output              merge cfg_bw_mgt_int and cfg_bw_mgt_msi
+//    .cfg_pme_mux                (                       ),      //output              merge cfg_pme_int and cfg_pme_msi
+//    .app_ras_des_sd_hold_ltssm  (1'b0                   ),      //input
+//    .app_ras_des_tba_ctrl       (2'b0                   ),      //input   [1:0]
+//    
+//    .dyn_debug_info_sel         (4'b0                   ),      //input   [3:0]
+//    .debug_info_mux             (                       ),      //output  [132:0]
+//    
+//    //system signal
+//    .smlh_link_up               (smlh_link_up           ),      //output
+//    .rdlh_link_up               (rdlh_link_up          ),      //output
+//    .smlh_ltssm_state           (/*smlh_ltssm_state*/     )       //output  [4:0]
+//);
+           
 /////////////////////////////////////////////////////////////////////////////////////
 endmodule

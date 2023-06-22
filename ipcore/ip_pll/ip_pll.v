@@ -27,19 +27,19 @@ module ip_pll (
     );
 
     localparam real CLKIN_FREQ          = 50.0;
-    localparam integer STATIC_RATIOI    = 4;
-    localparam integer STATIC_RATIO0    = 8;
-    localparam integer STATIC_RATIO1    = 119;
-    localparam integer STATIC_RATIO2    = 48;
+    localparam integer STATIC_RATIOI    = 2;
+    localparam integer STATIC_RATIO0    = 33;
+    localparam integer STATIC_RATIO1    = 123;
+    localparam integer STATIC_RATIO2    = 49;
     localparam integer STATIC_RATIO3    = 16;
     localparam integer STATIC_RATIO4    = 16;
-    localparam integer STATIC_RATIOF    = 95;
-    localparam integer STATIC_DUTY0     = 8;
-    localparam integer STATIC_DUTY1     = 119;
-    localparam integer STATIC_DUTY2     = 48;
+    localparam integer STATIC_RATIOF    = 49;
+    localparam integer STATIC_DUTY0     = 33;
+    localparam integer STATIC_DUTY1     = 123;
+    localparam integer STATIC_DUTY2     = 49;
     localparam integer STATIC_DUTY3     = 16;
     localparam integer STATIC_DUTY4     = 16;
-    localparam integer STATIC_DUTYF     = 95;
+    localparam integer STATIC_DUTYF     = 49;
     localparam integer STATIC_PHASE0    = 16;
     localparam integer STATIC_PHASE1    = 16;
     localparam integer STATIC_PHASE2    = 16;
@@ -58,7 +58,7 @@ module ip_pll (
     localparam CLKOUT4_GATE_EN          = "FALSE";
     localparam FBMODE                   = "FALSE";
     localparam integer FBDIV_SEL        = 0;
-    localparam BANDWIDTH                = "LOW";
+    localparam BANDWIDTH                = "OPTIMIZED";
     localparam PFDEN_EN                 = "FALSE";
     localparam VCOCLK_DIV2              = 1'b0;
     localparam DYNAMIC_RATIOI_EN        = "FALSE";

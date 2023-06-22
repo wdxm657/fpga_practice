@@ -54,28 +54,56 @@ module wr_scale_buf #(
     
     output                        ddr_frame_done
 );
-    localparam RAM_WIDTH      = 16'd32;
-    localparam DDR_DATA_WIDTH = DQ_WIDTH * 8; //256
-    localparam WR_ONE_LINE_NUM    = H_NUM*PIX_WIDTH/RAM_WIDTH; //1280 * 16 / 32 = 640
-                                                               //1920 * 16 / 32 = 960
-                                                               //960 * 16 / 32 = 480
-    localparam RD_ONE_LINE_NUM    = WR_ONE_LINE_NUM*RAM_WIDTH/DDR_DATA_WIDTH; // 640 * 32 / 256 = 80
-                                                                              // 960 * 32 / 256 = 120
-                                                                              // 480 * 32 / 256 = 60
-    localparam DDR_ADDR_OFFSET = RD_ONE_LINE_NUM*DDR_DATA_WIDTH/DQ_WIDTH;  // 80 * 256 / 32 = 640
-                                                                           // 120 * 256 / 32 = 960
-                                                                           // 60 * 256 / 32 = 480
     localparam HDMI_1 = 2'b00;
     localparam HDMI_2 = 2'b01;
     localparam HDMI_3 = 2'b10;
     localparam HDMI_4 = 2'b11;
-
-//0000
 reg ddr_wdone;
 wire ddr_rstn_2d,ddr_frame_done_0,rd_pulse,write_en,cur_frame;/*synthesis PAP_MARK_DEBUG="1"*/
 wire [11:0] wr_addr;
 wire [31:0] write_data;
-test hdmi_test(
+wire  [8:0] rd_addr;
+wire [255:0] hdmi_rd_wdata;
+wire  [255:0] rd_wdata_1d;
+wire [LINE_ADDR_WIDTH - 1'b1 :0] rd_cnt;             
+wire [FRAME_CNT_WIDTH - 1'b1 :0] rd_frame_cnt;
+wire ddr_wdata_req_1d,ddr_wreq;
+reg ddr_wdone_1;
+wire ddr_rstn_2d_1,ddr_frame_done_1,rd_pulse_1,write_en_1,cur_frame_1;/*synthesis PAP_MARK_DEBUG="1"*/
+wire [11:0] wr_addr_1;
+wire [31:0] write_data_1;
+wire  [8:0] rd_addr_1;
+wire [255:0] hdmi_rd_wdata_1;
+wire  [255:0] rd_wdata_1d_1;
+wire [LINE_ADDR_WIDTH - 1'b1 :0] rd_cnt_1;             
+wire [FRAME_CNT_WIDTH - 1'b1 :0] rd_frame_cnt_1;
+wire ddr_wdata_req_1d_1,ddr_wreq_1;
+reg ddr_wdone_2;
+wire ddr_rstn_2d_2,ddr_frame_done_2,rd_pulse_2,write_en_2,cur_frame_2;/*synthesis PAP_MARK_DEBUG="1"*/
+wire [11:0] wr_addr_2;
+wire [31:0] write_data_2;
+wire  [8:0] rd_addr_2;
+wire [255:0] hdmi_rd_wdata_2;
+wire  [255:0] rd_wdata_1d_2;
+wire [LINE_ADDR_WIDTH - 1'b1 :0] rd_cnt_2;             
+wire [FRAME_CNT_WIDTH - 1'b1 :0] rd_frame_cnt_2;
+wire ddr_wdata_req_1d_2,ddr_wreq_2;
+reg ddr_wdone_3;
+wire ddr_rstn_2d_3,ddr_frame_done_3,rd_pulse_3,write_en_3,cur_frame_3;/*synthesis PAP_MARK_DEBUG="1"*/
+wire [11:0] wr_addr_3;
+wire [31:0] write_data_3;
+wire  [8:0] rd_addr_3;
+wire [255:0] hdmi_rd_wdata_3;
+wire  [255:0] rd_wdata_1d_3;
+wire [LINE_ADDR_WIDTH - 1'b1 :0] rd_cnt_3;             
+wire [FRAME_CNT_WIDTH - 1'b1 :0] rd_frame_cnt_3;
+wire ddr_wdata_req_1d_3,ddr_wreq_3;
+
+//0000
+test #(
+    .H_NUM(640),
+    .V_NUM(360)
+) hdmi_test(
     .wr_clk   (wr_clk) ,       
     .wr_fsync (wr_fsync)   ,   
     .wr_en    (wr_en),         
@@ -89,7 +117,7 @@ test hdmi_test(
     .rd_pulse (rd_pulse) ,
     .wr_addr  (wr_addr) ,
     .write_en (write_en) ,
-    .write_data(write_data)    
+    .write_data(write_data)
 );
 
 // require addr len >= 11(1920 | 1280)
@@ -97,8 +125,6 @@ test hdmi_test(
 // so rd_addr len = addr len - 3
 // such as 16 * 16 = 256, wr_addr = 256 / 32 = 8
 //                        rd_addr = 8 >> 3 = 1
-wire  [8:0] rd_addr;
-wire [255:0] hdmi_rd_wdata;
 wr_fram_buf hdmi_wr_fram_buf (
     .wr_data            (  write_data     ),// input [31:0]
     .wr_addr            (  wr_addr        ),// input [11:0]
@@ -112,11 +138,6 @@ wr_fram_buf hdmi_wr_fram_buf (
     .rd_rst             (  ~ddr_rstn      ) // input
 );
 
-
-wire  [255:0] rd_wdata_1d;
-wire [LINE_ADDR_WIDTH - 1'b1 :0] rd_cnt;             
-wire [FRAME_CNT_WIDTH - 1'b1 :0] rd_frame_cnt;
-wire ddr_wdata_req_1d,ddr_wreq;
 testt #(
     .OFFSET (0),
     .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
@@ -143,11 +164,10 @@ testt #(
 
 
 //1111
-reg ddr_wdone_1;
-wire ddr_rstn_2d_1,ddr_frame_done_1,rd_pulse_1,write_en_1,cur_frame_1;/*synthesis PAP_MARK_DEBUG="1"*/
-wire [11:0] wr_addr_1;
-wire [31:0] write_data_1;
-test hdmi_test_1(
+test#(
+    .H_NUM(640),
+    .V_NUM(360)
+)  hdmi_test_1(
     .wr_clk   (wr_clk) ,       
     .wr_fsync (wr_fsync)   ,   
     .wr_en    (wr_en),         
@@ -163,8 +183,7 @@ test hdmi_test_1(
     .write_en (write_en_1) ,
     .write_data(write_data_1)    
 );
-wire  [8:0] rd_addr_1;
-wire [255:0] hdmi_rd_wdata_1;
+
 wr_fram_buf hdmi_wr_fram_buf_1 (
     .wr_data            (  write_data_1     ),// input [31:0]
     .wr_addr            (  wr_addr_1        ),// input [11:0]
@@ -177,12 +196,9 @@ wr_fram_buf hdmi_wr_fram_buf_1 (
     .rd_clk             (  ddr_clk        ),// input
     .rd_rst             (  ~ddr_rstn      ) // input
 );
-wire  [255:0] rd_wdata_1d_1;
-wire [LINE_ADDR_WIDTH - 1'b1 :0] rd_cnt_1;             
-wire [FRAME_CNT_WIDTH - 1'b1 :0] rd_frame_cnt_1;
-wire ddr_wdata_req_1d_1,ddr_wreq_1;
+
 testt #(
-    .OFFSET (480),
+    .OFFSET (320),
     .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
     .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
 ) testt_hdmi_1(
@@ -207,11 +223,10 @@ testt #(
 
 
 // 2222
-reg ddr_wdone_2;
-wire ddr_rstn_2d_2,ddr_frame_done_2,rd_pulse_2,write_en_2,cur_frame_2;/*synthesis PAP_MARK_DEBUG="1"*/
-wire [11:0] wr_addr_2;
-wire [31:0] write_data_2;
-test hdmi_test_2(
+test#(
+    .H_NUM(640),
+    .V_NUM(360)
+) hdmi_test_2(
     .wr_clk   (ov_wr_clk) ,       
     .wr_fsync (ov_wr_fsync)   ,   
     .wr_en    (ov_wr_en),         
@@ -228,8 +243,6 @@ test hdmi_test_2(
     .write_data(write_data_2)    
 );
 
-wire  [8:0] rd_addr_2;
-wire [255:0] hdmi_rd_wdata_2;
 wr_fram_buf hdmi_wr_fram_buf_2 (
     .wr_data            (  write_data_2     ),// input [31:0]
     .wr_addr            (  wr_addr_2        ),// input [11:0]
@@ -243,12 +256,8 @@ wr_fram_buf hdmi_wr_fram_buf_2 (
     .rd_rst             (  ~ddr_rstn      ) // input
 );
 
-wire  [255:0] rd_wdata_1d_2;
-wire [LINE_ADDR_WIDTH - 1'b1 :0] rd_cnt_2;             
-wire [FRAME_CNT_WIDTH - 1'b1 :0] rd_frame_cnt_2;
-wire ddr_wdata_req_1d_2,ddr_wreq_2;
 testt #(
-    .OFFSET (518400),
+    .OFFSET (230400),
     .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
     .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
 ) testt_hdmi_2(
@@ -272,11 +281,10 @@ testt #(
 );
 
 // 3333
-reg ddr_wdone_3;
-wire ddr_rstn_2d_3,ddr_frame_done_3,rd_pulse_3,write_en_3,cur_frame_3;/*synthesis PAP_MARK_DEBUG="1"*/
-wire [11:0] wr_addr_3;
-wire [31:0] write_data_3;
-test hdmi_test_3(
+test#(
+    .H_NUM(640),
+    .V_NUM(360)
+) hdmi_test_3(
     .wr_clk   (ov_wr_clk) ,       
     .wr_fsync (ov_wr_fsync)   ,   
     .wr_en    (ov_wr_en),         
@@ -293,8 +301,6 @@ test hdmi_test_3(
     .write_data(write_data_3)    
 );
 
-wire  [8:0] rd_addr_3;
-wire [255:0] hdmi_rd_wdata_3;
 wr_fram_buf hdmi_wr_fram_buf_3 (
     .wr_data            (  write_data_3     ),// input [31:0]
     .wr_addr            (  wr_addr_3        ),// input [11:0]
@@ -308,12 +314,8 @@ wr_fram_buf hdmi_wr_fram_buf_3 (
     .rd_rst             (  ~ddr_rstn      ) // input
 );
 
-wire  [255:0] rd_wdata_1d_3;
-wire [LINE_ADDR_WIDTH - 1'b1 :0] rd_cnt_3;             
-wire [FRAME_CNT_WIDTH - 1'b1 :0] rd_frame_cnt_3;
-wire ddr_wdata_req_1d_3,ddr_wreq_3;
 testt #(
-    .OFFSET (518880),
+    .OFFSET (230720),
     .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
     .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
 ) testt_hdmi_3(
@@ -426,11 +428,17 @@ assign o_ddr_wreq = sel == HDMI_1 ? ddr_wreq   :
                         sel == HDMI_3 ? hdmi_rd_wdata_2 : 
                         sel == HDMI_4 ? hdmi_rd_wdata_3 : 0;
 
-    assign ddr_waddr  = sel == HDMI_1 ? {rd_frame_cnt[0],rd_cnt}     :   
-                        sel == HDMI_2 ? {rd_frame_cnt_1[0],rd_cnt_1} :   
-                        sel == HDMI_3 ? {rd_frame_cnt_2[0],rd_cnt_2} :   
-                        sel == HDMI_4 ? {rd_frame_cnt_3[0],rd_cnt_3} : 0;
-
+    assign ddr_waddr  = sel == HDMI_1 ? {test_f_rd_cnt[0],rd_cnt}     :   
+                        sel == HDMI_2 ? {test_f_rd_cnt[0],rd_cnt_1} :   
+                        sel == HDMI_3 ? {test_f_rd_cnt[0],rd_cnt_2} :   
+                        sel == HDMI_4 ? {test_f_rd_cnt[0],rd_cnt_3} : 0;
+    reg [FRAME_CNT_WIDTH - 1'b1 :0] test_f_rd_cnt = 0;
+    always @(posedge ddr_clk)
+    begin 
+        if(ddr_frame_done_1) begin
+            test_f_rd_cnt <= test_f_rd_cnt + 1'b1;
+        end
+    end 
 /*
     assign ddr_wdata  = (~ddr_wdata_req_1d_1) & ddr_wdata_req ? rd_wdata_1d_1 : hdmi_rd_wdata_1;
     assign ddr_waddr  = {rd_frame_cnt_1[0],rd_cnt_1};
@@ -442,6 +450,6 @@ assign o_ddr_wreq = sel == HDMI_1 ? ddr_wreq   :
     assign ddr_waddr  = {rd_frame_cnt_3[0],rd_cnt_3};
 */
     assign ddr_frame_done = ddr_frame_done_0 || ddr_frame_done_1 || ddr_frame_done_2 || ddr_frame_done_3;
-    assign ddr_wr_len = 60; // 120 -- 60
+    assign ddr_wr_len = 40; // 120 -- 60
     
 endmodule

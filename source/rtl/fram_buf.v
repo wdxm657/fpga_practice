@@ -40,6 +40,14 @@ module fram_buf #(
     input                         hdmi_wr_en,
     input  [24 - 1'b1 : 0]        hdmi_wr_data,
     output reg                    init_done=0,
+    // pcie
+    input                        pcie_clk,
+    input                        pcie_init_done,
+    input                        cpu_rd_en      /*synthesis PAP_MARK_DEBUG="1"*/,
+    output [127:0]               cpu_rd_data    /*synthesis PAP_MARK_DEBUG="1"*/,
+    // cpu
+    input                        cpu_wr_en        /*synthesis PAP_MARK_DEBUG="1"*/,
+    input  [127:0]               cpu_wr_data      /*synthesis PAP_MARK_DEBUG="1"*/,
     // ddr
     input                         ddr_clk,
     input                         ddr_rstn,
@@ -80,7 +88,7 @@ module fram_buf #(
     input  [3:0]                  axi_rid            
 );
     parameter LEN_WIDTH       = MEM_DQ_WIDTH;
-    parameter LINE_ADDR_WIDTH = 22;//1920*1080:22 1280*720:20 1440*1080:22
+    parameter LINE_ADDR_WIDTH = 20;//1920*1080:22 1280*720:20 1440*1080:22
     parameter FRAME_CNT_WIDTH = CTRL_ADDR_WIDTH - LINE_ADDR_WIDTH;
     
     wire                             ddr_wr_bac;
@@ -111,8 +119,8 @@ wire  hdmi_scaler_vld;
 scaler#(
     .H(1920),
     .V(1080),
-    .H_SCALE(960),
-    .V_SCALE(540) 
+    .H_SCALE(640),
+    .V_SCALE(360) 
 ) hdmi_scaler(
     .clk            (hdmi_vin_clk),
     .rst_n          (ddr_rstn),
@@ -131,8 +139,8 @@ wire  ov_scaler_vld;
 scaler#(
     .H(1280),
     .V(720),
-    .H_SCALE(960),
-    .V_SCALE(540) 
+    .H_SCALE(640),
+    .V_SCALE(360) 
 ) ov5640_scaler(
     .clk            (ov_vin_clk),
     .rst_n          (ddr_rstn), 
@@ -144,6 +152,27 @@ scaler#(
     .scaler_data_vld         (ov_scaler_vld)
 );
 
+pcie_trans pcie_trans(
+    // pcie
+    .pcie_clk       (pcie_clk      ) ,
+    .pcie_init_done (pcie_init_done) ,
+    .cpu_rd_en      (cpu_rd_en     ) ,
+    .cpu_rd_data    (cpu_rd_data   ) ,
+                                   
+    .cpu_wr_en      (cpu_wr_en     ) ,
+    .cpu_wr_data    (cpu_wr_data   ) ,
+                                   
+    .hdmi_vld       (hdmi_scaler_vld      ) ,
+    .hdmi_vsync     (hdmi_vsync    ) ,
+    .hdmi_565       (hdmi_scaler_565      ) ,
+                                   
+    .ov_vld         (ov_scaler_vld        ) ,
+    .ov_vsync       (hdmi_wr_fsync      ) ,
+    .ov_565         (ov_scale_565        )
+   );
+
+
+
 reg wr_fsync = 0;/*synthesis PAP_MARK_DEBUG="1"*/
 reg wr_clk  =0;/*synthesis PAP_MARK_DEBUG="1"*/
 reg wr_en   =0;/*synthesis PAP_MARK_DEBUG="1"*/
@@ -154,8 +183,8 @@ reg [18:0] offset = 0;/*synthesis PAP_MARK_DEBUG="1"*/
     wr_scale_buf #(
         .ADDR_WIDTH       (  CTRL_ADDR_WIDTH  ),//parameter                     ADDR_WIDTH      = 6'd27,
         .ADDR_OFFSET      (  0                ),//parameter                     ADDR_OFFSET     = 32'h0000_0000,
-        .H_NUM            (  1920            ),//parameter                     H_NUM           = 12'd1920,
-        .V_NUM            (  1080            ),//parameter                     V_NUM           = 12'd1080,
+        .H_NUM            (  1280            ),//parameter                     H_NUM           = 12'd1920,
+        .V_NUM            (  720            ),//parameter                     V_NUM           = 12'd1080,
         .DQ_WIDTH         (  MEM_DQ_WIDTH     ),//parameter                     DQ_WIDTH        = 7'd32,
         .LEN_WIDTH        (  LEN_WIDTH        ),//parameter                     LEN_WIDTH       = 6'd16,
         .PIX_WIDTH        (  PIX_WIDTH        ),//parameter                     PIX_WIDTH       = 6'd24,

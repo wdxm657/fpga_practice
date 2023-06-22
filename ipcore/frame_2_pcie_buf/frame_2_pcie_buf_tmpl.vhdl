@@ -6,22 +6,22 @@
 --   * Change the net names in the port map.
 
 
-COMPONENT wr_fram_buf
+COMPONENT frame_2_pcie_buf
   PORT (
-    wr_data : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-    wr_addr : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
+    wr_data : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+    wr_addr : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
     wr_en : IN STD_LOGIC;
     wr_clk : IN STD_LOGIC;
     wr_rst : IN STD_LOGIC;
-    rd_addr : IN STD_LOGIC_VECTOR(5 DOWNTO 0);
-    rd_data : OUT STD_LOGIC_VECTOR(255 DOWNTO 0);
+    rd_addr : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
+    rd_data : OUT STD_LOGIC_VECTOR(127 DOWNTO 0);
     rd_clk : IN STD_LOGIC;
     rd_rst : IN STD_LOGIC
   );
 END COMPONENT;
 
 
-the_instance_name : wr_fram_buf
+the_instance_name : frame_2_pcie_buf
   PORT MAP (
     wr_data => wr_data,
     wr_addr => wr_addr,
