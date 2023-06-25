@@ -47,7 +47,7 @@ localparam FIFO_TYPE = "ASYN_FIFO" ; // @IPC enum SYN_FIFO,ASYN_FIFO
 
 localparam ASYN_FIFO_EN = "1" ; // @IPC bool
 
-localparam ALMOST_FULL_NUM = 4088 ; // @IPC int
+localparam ALMOST_FULL_NUM = 1260 ; // @IPC int
 
 localparam ALMOST_EMPTY_NUM = 4 ; // @IPC int
 

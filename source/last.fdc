@@ -1135,34 +1135,34 @@ set_clock_groups -name pix_clk -asynchronous -group [get_clocks {pix_clk}]
 # ******************************************************************************
 # ******************************************************************************
 # ******************************************************************************
-#define_attribute {p:perst_n} {PAP_IO_DIRECTION} {INPUT}
-#define_attribute {p:perst_n} {PAP_IO_LOC} {A19}
-#define_attribute {p:perst_n} {PAP_IO_VCCIO} {1.2}
-#define_attribute {p:perst_n} {PAP_IO_STANDARD} {LVCMOS12}
-#define_attribute {p:perst_n} {PAP_IO_NONE} {TRUE}
-#define_attribute {p:button_rst_n} {PAP_IO_DIRECTION} {INPUT}
-## KEY 8
-#define_attribute {p:button_rst_n} {PAP_IO_LOC} {H17} 
-#define_attribute {p:button_rst_n} {PAP_IO_VCCIO} {3.3}
-#define_attribute {p:button_rst_n} {PAP_IO_STANDARD} {LVCMOS15}
-#define_attribute {p:button_rst_n} {PAP_IO_NONE} {TRUE}
-#
-#define_attribute {n:pcie_pclk_div2} {PAP_CLOCK_ASSIGN} {GTP_CLKBUFG}
-#define_attribute {n:pcie_ref_clk} {PAP_CLOCK_ASSIGN} {GTP_CLKBUFG}
-#define_attribute {n:pcie_pclk} {PAP_CLOCK_ASSIGN} {GTP_CLKBUFG}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvhdr_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvh_ram.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K} {PAP_LOC} {DRM_82_168}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvhdr_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvh_ram.ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM18K} {PAP_LOC} {DRM_82_148}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvhdr_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvh_ram.ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM18K} {PAP_LOC} {DRM_142_168}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvhdr_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvh_ram.ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM18K} {PAP_LOC} {DRM_142_148}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvdata_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvd_ram.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K} {PAP_LOC} {DRM_178_148}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvdata_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvd_ram.ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM18K} {PAP_LOC} {DRM_178_168}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvdata_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvd_ram.ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM18K} {PAP_LOC} {DRM_178_192}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvdata_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvd_ram.ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM18K} {PAP_LOC} {DRM_178_212}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K} {PAP_LOC} {DRM_178_232}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM18K} {PAP_LOC} {DRM_178_252}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM18K} {PAP_LOC} {DRM_178_272}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM18K} {PAP_LOC} {DRM_178_292}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[4].U_GTP_DRM18K} {PAP_LOC} {DRM_178_316}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[5].U_GTP_DRM18K} {PAP_LOC} {DRM_142_316}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[6].U_GTP_DRM18K} {PAP_LOC} {DRM_82_316}
-#define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[7].U_GTP_DRM18K} {PAP_LOC} {DRM_82_292}
+define_attribute {p:perst_n} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:perst_n} {PAP_IO_LOC} {A19}
+define_attribute {p:perst_n} {PAP_IO_VCCIO} {1.2}
+define_attribute {p:perst_n} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:perst_n} {PAP_IO_NONE} {TRUE}
+define_attribute {p:button_rst_n} {PAP_IO_DIRECTION} {INPUT}
+# KEY 8
+define_attribute {p:button_rst_n} {PAP_IO_LOC} {H17} 
+define_attribute {p:button_rst_n} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:button_rst_n} {PAP_IO_STANDARD} {LVCMOS15}
+define_attribute {p:button_rst_n} {PAP_IO_NONE} {TRUE}
+
+define_attribute {n:pcie_pclk_div2} {PAP_CLOCK_ASSIGN} {GTP_CLKBUFG}
+define_attribute {n:pcie_ref_clk} {PAP_CLOCK_ASSIGN} {GTP_CLKBUFG}
+define_attribute {n:pcie_pclk} {PAP_CLOCK_ASSIGN} {GTP_CLKBUFG}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvhdr_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvh_ram.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K} {PAP_LOC} {DRM_82_168}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvhdr_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvh_ram.ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM18K} {PAP_LOC} {DRM_82_148}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvhdr_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvh_ram.ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM18K} {PAP_LOC} {DRM_142_168}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvhdr_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvh_ram.ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM18K} {PAP_LOC} {DRM_142_148}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvdata_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvd_ram.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K} {PAP_LOC} {DRM_178_148}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvdata_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvd_ram.ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM18K} {PAP_LOC} {DRM_178_168}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvdata_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvd_ram.ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM18K} {PAP_LOC} {DRM_178_192}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exrcvdata_rams.U_ipml_sdpram_ipsl_pcie_ext_rcvd_ram.ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM18K} {PAP_LOC} {DRM_178_212}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[0].U_GTP_DRM18K} {PAP_LOC} {DRM_178_232}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[1].U_GTP_DRM18K} {PAP_LOC} {DRM_178_252}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[2].U_GTP_DRM18K} {PAP_LOC} {DRM_178_272}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[3].U_GTP_DRM18K} {PAP_LOC} {DRM_178_292}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[4].U_GTP_DRM18K} {PAP_LOC} {DRM_178_316}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[5].U_GTP_DRM18K} {PAP_LOC} {DRM_142_316}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[6].U_GTP_DRM18K} {PAP_LOC} {DRM_82_316}
+define_attribute {i:my_pcie.u_pcie_top.u_pcie_hard_ctrl.u_pcie_iip_exretry_rams.U_ipml_spram_ipsl_pcie_retryd_ram.ADDR_LOOP[0].DATA_LOOP[7].U_GTP_DRM18K} {PAP_LOC} {DRM_82_292}
