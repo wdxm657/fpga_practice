@@ -411,6 +411,7 @@ pcie_trans pcie_trans(
                 
     .hdmi_clk       (pix_clk_out   ) ,                   
     .hdmi_vld       (de_out        ) ,
+    .hdmi_hsync     (hs_out        ) ,
     .hdmi_vsync     (vs_out        ) ,
     .hdmi_565       (o_rgb565      )
    );

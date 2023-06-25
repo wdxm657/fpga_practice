@@ -9,7 +9,8 @@ module pcie_trans(
     input  [127:0]               cpu_wr_data      /*synthesis PAP_MARK_DEBUG="1"*/,
 
     input                        hdmi_clk,
-    input                        hdmi_vld,
+    input                        hdmi_vld        /*synthesis PAP_MARK_DEBUG="1"*/,      
+    input                        hdmi_hsync      /*synthesis PAP_MARK_DEBUG="1"*/,    
     input                        hdmi_vsync,
     input    [15:0]              hdmi_565
    );
@@ -19,29 +20,28 @@ reg hdmi_rst = 1;/*synthesis PAP_MARK_DEBUG="1"*/
 
 always @(posedge pcie_clk) 
 begin
-     if(cpu_wr_en & cpu_wr_data == {32{4'h8}}) 
+     if(cpu_rd_en) 
          pcie_rdy <= 1;
-     else 
-         pcie_rdy <= pcie_rdy;
+     else pcie_rdy <= pcie_rdy;
 end
 
 always @(posedge hdmi_clk) 
 begin
      if(pcie_rdy & hdmi_vsync) 
          hdmi_rst <= 0;
-     else 
+     else if(~pcie_rdy)
+         hdmi_rst <= 1;
+     else
          hdmi_rst <= hdmi_rst;
 end
 
 reg [11:0] hdmi_x_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
 always @(posedge hdmi_clk)
 begin
-    if(hdmi_vsync)
+    if(hdmi_hsync)
         hdmi_x_cnt <= 12'd0;
     else if(hdmi_vld)
         hdmi_x_cnt <= hdmi_x_cnt + 1'b1;
-    else if(hdmi_x_cnt == 1280 - 1)
-        hdmi_x_cnt <= 12'd0;
 end 
 
 reg [11:0] hdmi_y_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
@@ -84,8 +84,8 @@ wire hdmi_almost_full;/*synthesis PAP_MARK_DEBUG="1"*/
 wire hdmi_almost_empty;/*synthesis PAP_MARK_DEBUG="1"*/
 wire hdmi_rd_en;/*synthesis PAP_MARK_DEBUG="1"*/
 wire [127:0] hdmi_rd_data;/*synthesis PAP_MARK_DEBUG="1"*/
-assign hdmi_rd_en  = hdmi_almost_full ? 0 : cpu_rd_en;
-assign cpu_rd_data = hdmi_rd_en ? {8{16'hCCCC}} : hdmi_rd_data;
+assign hdmi_rd_en  = wr_water_level > 1024 ? 0 : cpu_rd_en;
+assign cpu_rd_data = hdmi_rd_en ? hdmi_rd_data : {8{16'hCCCC}};
 frame_2_pcie_fifo hdmi_fifo (
   .wr_clk            (hdmi_clk),             // input           
   .wr_rst            (hdmi_rst),             // input           
