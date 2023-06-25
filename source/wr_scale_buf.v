@@ -139,7 +139,7 @@ wr_fram_buf hdmi_wr_fram_buf (
 );
 
 testt #(
-    .OFFSET (0),
+    .OFFSET (230400),
     .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
     .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
 ) testt_hdmi(
@@ -198,7 +198,7 @@ wr_fram_buf hdmi_wr_fram_buf_1 (
 );
 
 testt #(
-    .OFFSET (320),
+    .OFFSET (230720),
     .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
     .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
 ) testt_hdmi_1(
@@ -222,122 +222,122 @@ testt #(
 );
 
 
-// 2222
-test#(
-    .H_NUM(640),
-    .V_NUM(360)
-) hdmi_test_2(
-    .wr_clk   (ov_wr_clk) ,       
-    .wr_fsync (ov_wr_fsync)   ,   
-    .wr_en    (ov_wr_en),         
-    .ddr_rstn (ddr_rstn)   ,   
-    .wr_data  (ov_wr_data)  ,     
-    .ddr_rstn_2d(ddr_rstn_2d_2),
-    .ddr_wdone(ddr_wdone_2),
-    //.ddr_wdone               (i_ddr_wdone)     ,
-    .cur_frame (cur_frame_2),
-    .ddr_frame_done(ddr_frame_done_2),
-    .rd_pulse (rd_pulse_2) ,
-    .wr_addr  (wr_addr_2) ,
-    .write_en (write_en_2) ,
-    .write_data(write_data_2)    
-);
-
-wr_fram_buf hdmi_wr_fram_buf_2 (
-    .wr_data            (  write_data_2     ),// input [31:0]
-    .wr_addr            (  wr_addr_2        ),// input [11:0]
-    .wr_en              (  write_en_2       ),// input
-    .wr_clk             (  ov_wr_clk         ),// input
-    .wr_rst             (  ~ddr_rstn_2d_2   ),// input
-                
-    .rd_addr            (  rd_addr_2        ),// input [8:0]
-    .rd_data            (  hdmi_rd_wdata_2       ),// output [255:0]
-    .rd_clk             (  ddr_clk        ),// input
-    .rd_rst             (  ~ddr_rstn      ) // input
-);
-
-testt #(
-    .OFFSET (230400),
-    .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
-    .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
-) testt_hdmi_2(
-    .ddr_clk                 (ddr_clk)           ,
-    .wr_fsync                (ov_wr_fsync)        ,
-    .ddr_rstn                (ddr_rstn)        ,
-    .rd_pulse                (rd_pulse_2)        ,
-    .hdmi_rd_wdata           (hdmi_rd_wdata_2)          ,
-    .ddr_wdata_req           (ddr_wdata_req)     ,
-    .ddr_frame_done          (ddr_frame_done_2)  ,
-    .ddr_wdone               (ddr_wdone_2)     ,
-    //.ddr_wdone               (i_ddr_wdone)     ,
-
-    .ddr_wdata_req_1d        (ddr_wdata_req_1d_2),
-    .ddr_wreq                (ddr_wreq_2)    ,
-    //.ddr_wreq                (o_ddr_wreq)    ,
-    .rd_addr                 (rd_addr_2)       ,
-    .rd_cnt                  (rd_cnt_2)      ,
-    .rd_frame_cnt            (rd_frame_cnt_2)    ,
-    .rd_wdata_1d             (rd_wdata_1d_2)   
-);
-
-// 3333
-test#(
-    .H_NUM(640),
-    .V_NUM(360)
-) hdmi_test_3(
-    .wr_clk   (ov_wr_clk) ,       
-    .wr_fsync (ov_wr_fsync)   ,   
-    .wr_en    (ov_wr_en),         
-    .ddr_rstn (ddr_rstn)   ,   
-    .wr_data  (ov_wr_data)  ,     
-    .ddr_rstn_2d(ddr_rstn_2d_3),
-    .ddr_wdone(ddr_wdone_3),
-    //.ddr_wdone               (i_ddr_wdone)     ,
-    .cur_frame (cur_frame_3),
-    .ddr_frame_done(ddr_frame_done_3),
-    .rd_pulse (rd_pulse_3) ,
-    .wr_addr  (wr_addr_3) ,
-    .write_en (write_en_3) ,
-    .write_data(write_data_3)    
-);
-
-wr_fram_buf hdmi_wr_fram_buf_3 (
-    .wr_data            (  write_data_3     ),// input [31:0]
-    .wr_addr            (  wr_addr_3        ),// input [11:0]
-    .wr_en              (  write_en_3       ),// input
-    .wr_clk             (  ov_wr_clk         ),// input
-    .wr_rst             (  ~ddr_rstn_2d_3   ),// input
-                
-    .rd_addr            (  rd_addr_3        ),// input [8:0]
-    .rd_data            (  hdmi_rd_wdata_3       ),// output [255:0]
-    .rd_clk             (  ddr_clk        ),// input
-    .rd_rst             (  ~ddr_rstn      ) // input
-);
-
-testt #(
-    .OFFSET (230720),
-    .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
-    .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
-) testt_hdmi_3(
-    .ddr_clk                 (ddr_clk)           ,
-    .wr_fsync                (ov_wr_fsync)        ,
-    .ddr_rstn                (ddr_rstn)        ,
-    .rd_pulse                (rd_pulse_3)        ,
-    .hdmi_rd_wdata           (hdmi_rd_wdata_3)          ,
-    .ddr_wdata_req           (ddr_wdata_req)     ,
-    .ddr_frame_done          (ddr_frame_done_3)  ,
-    .ddr_wdone               (ddr_wdone_3)     ,
-    //.ddr_wdone               (i_ddr_wdone)     ,
-
-    .ddr_wdata_req_1d        (ddr_wdata_req_1d_3),
-    .ddr_wreq                (ddr_wreq_3)    ,
-    //.ddr_wreq                (o_ddr_wreq)    ,
-    .rd_addr                 (rd_addr_3)       ,
-    .rd_cnt                  (rd_cnt_3)      ,
-    .rd_frame_cnt            (rd_frame_cnt_3)    ,
-    .rd_wdata_1d             (rd_wdata_1d_3)   
-);
-
+//// 2222
+//test#(
+//    .H_NUM(640),
+//    .V_NUM(360)
+//) hdmi_test_2(
+//    .wr_clk   (ov_wr_clk) ,       
+//    .wr_fsync (ov_wr_fsync)   ,   
+//    .wr_en    (ov_wr_en),         
+//    .ddr_rstn (ddr_rstn)   ,   
+//    .wr_data  (ov_wr_data)  ,     
+//    .ddr_rstn_2d(ddr_rstn_2d_2),
+//    .ddr_wdone(ddr_wdone_2),
+//    //.ddr_wdone               (i_ddr_wdone)     ,
+//    .cur_frame (cur_frame_2),
+//    .ddr_frame_done(ddr_frame_done_2),
+//    .rd_pulse (rd_pulse_2) ,
+//    .wr_addr  (wr_addr_2) ,
+//    .write_en (write_en_2) ,
+//    .write_data(write_data_2)    
+//);
+//
+//wr_fram_buf hdmi_wr_fram_buf_2 (
+//    .wr_data            (  write_data_2     ),// input [31:0]
+//    .wr_addr            (  wr_addr_2        ),// input [11:0]
+//    .wr_en              (  write_en_2       ),// input
+//    .wr_clk             (  ov_wr_clk         ),// input
+//    .wr_rst             (  ~ddr_rstn_2d_2   ),// input
+//                
+//    .rd_addr            (  rd_addr_2        ),// input [8:0]
+//    .rd_data            (  hdmi_rd_wdata_2       ),// output [255:0]
+//    .rd_clk             (  ddr_clk        ),// input
+//    .rd_rst             (  ~ddr_rstn      ) // input
+//);
+//
+//testt #(
+//    .OFFSET (230400),
+//    .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
+//    .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
+//) testt_hdmi_2(
+//    .ddr_clk                 (ddr_clk)           ,
+//    .wr_fsync                (ov_wr_fsync)        ,
+//    .ddr_rstn                (ddr_rstn)        ,
+//    .rd_pulse                (rd_pulse_2)        ,
+//    .hdmi_rd_wdata           (hdmi_rd_wdata_2)          ,
+//    .ddr_wdata_req           (ddr_wdata_req)     ,
+//    .ddr_frame_done          (ddr_frame_done_2)  ,
+//    .ddr_wdone               (ddr_wdone_2)     ,
+//    //.ddr_wdone               (i_ddr_wdone)     ,
+//
+//    .ddr_wdata_req_1d        (ddr_wdata_req_1d_2),
+//    .ddr_wreq                (ddr_wreq_2)    ,
+//    //.ddr_wreq                (o_ddr_wreq)    ,
+//    .rd_addr                 (rd_addr_2)       ,
+//    .rd_cnt                  (rd_cnt_2)      ,
+//    .rd_frame_cnt            (rd_frame_cnt_2)    ,
+//    .rd_wdata_1d             (rd_wdata_1d_2)   
+//);
+//
+//// 3333
+//test#(
+//    .H_NUM(640),
+//    .V_NUM(360)
+//) hdmi_test_3(
+//    .wr_clk   (ov_wr_clk) ,       
+//    .wr_fsync (ov_wr_fsync)   ,   
+//    .wr_en    (ov_wr_en),         
+//    .ddr_rstn (ddr_rstn)   ,   
+//    .wr_data  (ov_wr_data)  ,     
+//    .ddr_rstn_2d(ddr_rstn_2d_3),
+//    .ddr_wdone(ddr_wdone_3),
+//    //.ddr_wdone               (i_ddr_wdone)     ,
+//    .cur_frame (cur_frame_3),
+//    .ddr_frame_done(ddr_frame_done_3),
+//    .rd_pulse (rd_pulse_3) ,
+//    .wr_addr  (wr_addr_3) ,
+//    .write_en (write_en_3) ,
+//    .write_data(write_data_3)    
+//);
+//
+//wr_fram_buf hdmi_wr_fram_buf_3 (
+//    .wr_data            (  write_data_3     ),// input [31:0]
+//    .wr_addr            (  wr_addr_3        ),// input [11:0]
+//    .wr_en              (  write_en_3       ),// input
+//    .wr_clk             (  ov_wr_clk         ),// input
+//    .wr_rst             (  ~ddr_rstn_2d_3   ),// input
+//                
+//    .rd_addr            (  rd_addr_3        ),// input [8:0]
+//    .rd_data            (  hdmi_rd_wdata_3       ),// output [255:0]
+//    .rd_clk             (  ddr_clk        ),// input
+//    .rd_rst             (  ~ddr_rstn      ) // input
+//);
+//
+//testt #(
+//    .OFFSET (230720),
+//    .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
+//    .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
+//) testt_hdmi_3(
+//    .ddr_clk                 (ddr_clk)           ,
+//    .wr_fsync                (ov_wr_fsync)        ,
+//    .ddr_rstn                (ddr_rstn)        ,
+//    .rd_pulse                (rd_pulse_3)        ,
+//    .hdmi_rd_wdata           (hdmi_rd_wdata_3)          ,
+//    .ddr_wdata_req           (ddr_wdata_req)     ,
+//    .ddr_frame_done          (ddr_frame_done_3)  ,
+//    .ddr_wdone               (ddr_wdone_3)     ,
+//    //.ddr_wdone               (i_ddr_wdone)     ,
+//
+//    .ddr_wdata_req_1d        (ddr_wdata_req_1d_3),
+//    .ddr_wreq                (ddr_wreq_3)    ,
+//    //.ddr_wreq                (o_ddr_wreq)    ,
+//    .rd_addr                 (rd_addr_3)       ,
+//    .rd_cnt                  (rd_cnt_3)      ,
+//    .rd_frame_cnt            (rd_frame_cnt_3)    ,
+//    .rd_wdata_1d             (rd_wdata_1d_3)   
+//);
+//
 reg [11:0] del_cnt=0;/*synthesis PAP_MARK_DEBUG="1"*/
     always @(posedge ddr_clk)
     begin 
@@ -368,7 +368,7 @@ reg [1:0] sel = HDMI_1;/*synthesis PAP_MARK_DEBUG="1"*/
             sel <= HDMI_2;
         end
         else if(ddr_frame_done_1) begin
-            sel <= HDMI_3;
+            sel <= HDMI_1;
         end
         else if(ddr_frame_done_2) begin
             sel <= HDMI_4;

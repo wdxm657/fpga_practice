@@ -190,7 +190,7 @@ reg [18:0] offset = 0;/*synthesis PAP_MARK_DEBUG="1"*/
         .PIX_WIDTH        (  PIX_WIDTH        ),//parameter                     PIX_WIDTH       = 6'd24,
         .LINE_ADDR_WIDTH  (  LINE_ADDR_WIDTH  ),//parameter                     LINE_ADDR_WIDTH = 4'd19,
         .FRAME_CNT_WIDTH  (  FRAME_CNT_WIDTH  ) //parameter                     FRAME_CNT_WIDTH = 4'd8
-    ) wr_hdmi_buf (                                       
+    ) wr_2_ddr_buf (                                       
         .ddr_clk          (  ddr_clk          ),//input                         ddr_clk,
         .ddr_rstn         (  ddr_rstn         ),//input                         ddr_rstn,
 
@@ -216,54 +216,6 @@ reg [18:0] offset = 0;/*synthesis PAP_MARK_DEBUG="1"*/
         .ddr_frame_done   (  ddr_frame_done    )//output [FRAME_CNT_WIDTH-1 :0] frame_wcnt,
     );
 
-//   reg [1:0] selector = 0;/*synthesis PAP_MARK_DEBUG="1"*/
-//   always @(*) 
-//   begin
-//        if(ddr_frame_done) begin
-//            selector <= selector + 1'b1;
-//        end
-//   end
-//
-//   always @(*) 
-//   begin
-//     case(selector)   
-//       2'b00 : begin
-//                 wr_fsync <= ov_wr_fsync;
-//                 wr_clk <=   ov_vin_clk;
-//                 wr_en <=    ov_scaler_vld;
-//                 wr_data <=  ov_scale_565;     
-//                 offset <= 19'd0;
-//               end
-//       2'b01 : begin
-//                 wr_fsync <= ov_wr_fsync;
-//                 wr_clk <=   ov_vin_clk;
-//                 wr_en <=    ov_scaler_vld;
-//                 wr_data <=  ov_scale_565;
-//                 offset <= 19'd480;
-//               end
-//       2'b10 : begin
-//                 wr_fsync <= ov_wr_fsync;
-//                 wr_clk <=   ov_vin_clk;
-//                 wr_en <=    ov_scaler_vld;
-//                 wr_data <=  ov_scale_565;
-//                 offset <= 19'd518400;
-//               end
-//       2'b11 : begin
-//                 wr_fsync <= ov_wr_fsync;
-//                 wr_clk <=   ov_vin_clk;
-//                 wr_en <=    ov_scaler_vld;
-//                 wr_data <=  ov_scale_565;
-//                 offset <= 19'd518880;
-//               end
-//     default: begin
-//                 wr_fsync <= wr_fsync;    
-//                 wr_clk <= wr_clk;       
-//                 wr_en <= wr_en;     
-//                 wr_data <= wr_data;    
-//              end      
-//     endcase
-//   end
-
     always @(posedge ddr_clk)
     begin
         if(ddr_frame_done)
@@ -282,7 +234,7 @@ reg [18:0] offset = 0;/*synthesis PAP_MARK_DEBUG="1"*/
         .PIX_WIDTH        (  PIX_WIDTH        ),//parameter                     PIX_WIDTH       = 6'd24,
         .LINE_ADDR_WIDTH  (  LINE_ADDR_WIDTH  ),//parameter                     LINE_ADDR_WIDTH = 4'd19,
         .FRAME_CNT_WIDTH  (  FRAME_CNT_WIDTH  ) //parameter                     FRAME_CNT_WIDTH = 4'd8
-    ) rd_buf (
+    ) rd_f_ddr_buf (
         .ddr_clk         (  ddr_clk           ),//input                         ddr_clk,
         .ddr_rstn        (  ddr_rstn          ),//input                         ddr_rstn,
 

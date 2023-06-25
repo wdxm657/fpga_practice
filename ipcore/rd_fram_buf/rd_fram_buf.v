@@ -32,11 +32,11 @@ module rd_fram_buf
     );
 
 
-localparam WR_ADDR_WIDTH = 9 ; // @IPC int 9,20
+localparam WR_ADDR_WIDTH = 7 ; // @IPC int 9,20
 
 localparam WR_DATA_WIDTH = 256 ; // @IPC int 1,1152
 
-localparam RD_ADDR_WIDTH = 12 ; // @IPC int 9,20
+localparam RD_ADDR_WIDTH = 10 ; // @IPC int 9,20
 
 localparam RD_DATA_WIDTH = 32 ; // @IPC int 1,1152
 
