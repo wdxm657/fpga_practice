@@ -3,7 +3,7 @@ module pcie_trans(
     input                        pcie_clk,
     input                        pcie_init_done,
     input                        cpu_rd_en      /*synthesis PAP_MARK_DEBUG="1"*/,
-    output [127:0]               cpu_rd_data    /*synthesis PAP_MARK_DEBUG="1"*/,
+    output reg [127:0]               cpu_rd_data    /*synthesis PAP_MARK_DEBUG="1"*/,
     // cpu
     input                        cpu_wr_en        /*synthesis PAP_MARK_DEBUG="1"*/,
     input  [127:0]               cpu_wr_data      /*synthesis PAP_MARK_DEBUG="1"*/,
@@ -14,29 +14,19 @@ module pcie_trans(
     input    [15:0]              hdmi_565
    );
 
-reg pcie_rdy = 0;/*synthesis PAP_MARK_DEBUG="1"*/
-reg hdmi_rst = 1;/*synthesis PAP_MARK_DEBUG="1"*/
-
-always @(posedge pcie_clk) 
+reg hdmi_vsync_d1 = 0;
+wire wr_rst;
+always @(posedge hdmi_clk)
 begin
-     if(cpu_wr_en & cpu_wr_data == {32{4'h8}}) 
-         pcie_rdy <= 1;
-     else 
-         pcie_rdy <= pcie_rdy;
-end
+    hdmi_vsync_d1 <= hdmi_vsync;
+end 
 
-always @(posedge hdmi_clk) 
-begin
-     if(pcie_rdy & hdmi_vsync) 
-         hdmi_rst <= 0;
-     else 
-         hdmi_rst <= hdmi_rst;
-end
+assign wr_rst = (~hdmi_vsync_d1 & hdmi_vsync);
 
 reg [11:0] hdmi_x_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
 always @(posedge hdmi_clk)
 begin
-    if(hdmi_vsync)
+    if(wr_rst)
         hdmi_x_cnt <= 12'd0;
     else if(hdmi_vld)
         hdmi_x_cnt <= hdmi_x_cnt + 1'b1;
@@ -47,7 +37,7 @@ end
 reg [11:0] hdmi_y_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
 always @(posedge hdmi_clk)
 begin
-    if(hdmi_vsync)
+    if(wr_rst)
         hdmi_y_cnt <= 12'd0;
     else if(hdmi_vld & hdmi_x_cnt == 1280 - 1)
         hdmi_y_cnt <= hdmi_y_cnt + 1'b1;
@@ -58,7 +48,7 @@ end
 reg [15:0]                test_data;/*synthesis PAP_MARK_DEBUG="1"*/
 always@(posedge hdmi_clk)
 begin
-    if(hdmi_vsync) begin
+    if(wr_rst) begin
         test_data <= 16'b0;
     end
     else if(hdmi_vld) begin
@@ -79,16 +69,41 @@ begin
 end
 
 wire [12:0]wr_water_level;/*synthesis PAP_MARK_DEBUG="1"*/
-wire [9:0] rd_water_level;/*synthesis PAP_MARK_DEBUG="1"*/
-wire hdmi_almost_full;/*synthesis PAP_MARK_DEBUG="1"*/
-wire hdmi_almost_empty;/*synthesis PAP_MARK_DEBUG="1"*/
-wire hdmi_rd_en;/*synthesis PAP_MARK_DEBUG="1"*/
 wire [127:0] hdmi_rd_data;/*synthesis PAP_MARK_DEBUG="1"*/
-assign hdmi_rd_en  = hdmi_almost_full ? 0 : cpu_rd_en;
-assign cpu_rd_data = hdmi_rd_en ? {8{16'hCCCC}} : hdmi_rd_data;
+reg hdmi_rd_en = 0;
+
+reg [31:0] cnt = 0;/*synthesis PAP_MARK_DEBUG="1"*/
+reg sel = 0;/*synthesis PAP_MARK_DEBUG="1"*/
+always@(posedge pcie_clk)
+begin
+    if(cpu_rd_en)begin
+        cnt <= cnt + 1'b1;
+        if(sel == 0 & wr_water_level > 1278) begin
+            hdmi_rd_en <= 0;
+            cpu_rd_data <= 4'hA;
+            sel = 1;
+            cnt <= 0;
+        end
+        else if(sel == 1) begin
+            hdmi_rd_en <= cpu_rd_en;
+            cpu_rd_data <= hdmi_rd_data;
+            if (cnt == 640 - 1) begin
+                sel = 0;
+                cnt <= 0;
+            end
+        end
+        else begin
+            hdmi_rd_en <= 0;
+            cpu_rd_data <= 0;
+            sel = 0;
+            cnt <= 0;
+        end
+    end
+end
+
 frame_2_pcie_fifo hdmi_fifo (
   .wr_clk            (hdmi_clk),             // input           
-  .wr_rst            (hdmi_rst),             // input           
+  .wr_rst            (wr_rst),               // input           
   .wr_en             (hdmi_vld),             // input           
   .wr_data           (test_data),            // input [15:0]    
   .wr_full           (hdmi_wr_full),         // output          
@@ -96,8 +111,8 @@ frame_2_pcie_fifo hdmi_fifo (
   .wr_water_level    (wr_water_level),       // output   
        
   .rd_clk            (pcie_clk),             // input           
-  .rd_rst            (hdmi_rst),             // input           
-  .rd_en             (hdmi_rd_en),           // input           
+  .rd_rst            (~pcie_init_done),      // input           
+  .rd_en             (hdmi_rd_en),            // input           
   .rd_data           (hdmi_rd_data),         // output [127:0]  
   .rd_empty          (hdmi_rd_empty),        // output          
   .almost_empty      (hdmi_almost_empty),    // output [9:0]    
