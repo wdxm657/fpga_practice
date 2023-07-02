@@ -9,7 +9,8 @@ module pcie_trans(
     input  [127:0]               cpu_wr_data      /*synthesis PAP_MARK_DEBUG="1"*/,
 
     input                        hdmi_clk,
-    input                        hdmi_vld,
+    input                        hdmi_vld        /*synthesis PAP_MARK_DEBUG="1"*/,      
+    input                        hdmi_hsync      /*synthesis PAP_MARK_DEBUG="1"*/,    
     input                        hdmi_vsync,
     input    [15:0]              hdmi_565
    );
@@ -30,8 +31,6 @@ begin
         hdmi_x_cnt <= 12'd0;
     else if(hdmi_vld)
         hdmi_x_cnt <= hdmi_x_cnt + 1'b1;
-    else if(hdmi_x_cnt == 1280 - 1)
-        hdmi_x_cnt <= 12'd0;
 end 
 
 reg [11:0] hdmi_y_cnt;/*synthesis PAP_MARK_DEBUG="1"*/

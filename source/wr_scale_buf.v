@@ -139,7 +139,7 @@ wr_fram_buf hdmi_wr_fram_buf (
 );
 
 testt #(
-    .OFFSET (0),
+    .OFFSET (230400),
     .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
     .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
 ) testt_hdmi(
@@ -198,7 +198,7 @@ wr_fram_buf hdmi_wr_fram_buf_1 (
 );
 
 testt #(
-    .OFFSET (320),
+    .OFFSET (230720),
     .FRAME_CNT_WIDTH (FRAME_CNT_WIDTH),
     .LINE_ADDR_WIDTH (LINE_ADDR_WIDTH)
 ) testt_hdmi_1(
