@@ -77,32 +77,35 @@ reg sel = 0;/*synthesis PAP_MARK_DEBUG="1"*/
 always@(posedge pcie_clk)
 begin
     if(cpu_rd_en)begin
-        cnt <= cnt + 1'b1;
         if(sel == 0 & wr_water_level > 1278) begin
             hdmi_rd_en <= 0;
-            cpu_rd_data <= 4'hA;
-            sel = 1;
+            cpu_rd_data <= 128'hA;
+            sel <= 1;
             cnt <= 0;
         end
         else if(sel == 1) begin
+            cnt <= cnt + 1'b1;
             hdmi_rd_en <= cpu_rd_en;
             cpu_rd_data <= hdmi_rd_data;
             if (cnt == 640 - 1) begin
-                sel = 0;
+                sel <= 0;
                 cnt <= 0;
             end
         end
         else begin
             hdmi_rd_en <= 0;
             cpu_rd_data <= 0;
-            sel = 0;
+            sel <= 0;
             cnt <= 0;
         end
     end
 end
 
+// hs hb    vsync 
+
 frame_2_pcie_fifo hdmi_fifo (
-  .wr_clk            (hdmi_clk),             // input           
+// 16 pix
+  .wr_clk            (hdmi_clk),             // input           34Mhz 
   .wr_rst            (wr_rst),               // input           
   .wr_en             (hdmi_vld),             // input           
   .wr_data           (test_data),            // input [15:0]    
@@ -110,7 +113,8 @@ frame_2_pcie_fifo hdmi_fifo (
   .almost_full       (hdmi_almost_full),     // output [12:0]   
   .wr_water_level    (wr_water_level),       // output   
        
-  .rd_clk            (pcie_clk),             // input           
+// 1CLK 128wei    16pix     640DW 
+  .rd_clk            (pcie_clk),             // input           100Mhz
   .rd_rst            (~pcie_init_done),      // input           
   .rd_en             (hdmi_rd_en),            // input           
   .rd_data           (hdmi_rd_data),         // output [127:0]  
