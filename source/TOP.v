@@ -294,8 +294,8 @@ wire [23:0] hdmi_rgb888;
 wire [23:0] ov_rgb888;
 assign hdmi_rgb888 = {r_in,g_in,b_in};
 assign ov_rgb888 = {i_rgb565[15:11],i_rgb565[15:13],i_rgb565[10:5],i_rgb565[10:9],i_rgb565[4:0],i_rgb565[4:2]};
-wire i_pcie_mwr_en;
-wire [127:0] o_ddr_data;
+wire cpu_rd_en;
+wire [127:0] cpu_rd_data;
 wire cpld_data_valid;
 wire [127:0] axis_rx_data;
 /* ddr buffer sig*/
@@ -403,8 +403,8 @@ pcie_trans pcie_trans(
     .pcie_clk        (pcie_pclk_div2),
     .pcie_init_done  (pcie_init_done),
     // fpga 2 cpu
-    .cpu_rd_en       (i_pcie_mwr_en),
-    .cpu_rd_data     (o_ddr_data),
+    .cpu_rd_en       (cpu_rd_en),
+    .cpu_rd_data     (cpu_rd_data),
     // cpu 2 fpga
     .cpu_wr_en         (cpld_data_valid),
     .cpu_wr_data       (axis_rx_data),
@@ -628,8 +628,8 @@ u_ipsl_pcie_dma
     .rst_n                  (core_rst_n             ),
 
     // fpga 2 cpu
-    .o_pcie_mwr_en          (i_pcie_mwr_en)           ,
-    .i_ddr_data             (o_ddr_data)              ,
+    .cpu_rd_en               (cpu_rd_en)           , 
+    .cpu_rd_data             (cpu_rd_data)              ,
     
     // cpu 2 fpga
     .o_cpld_data_valid       (cpld_data_valid),

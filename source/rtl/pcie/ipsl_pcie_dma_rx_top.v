@@ -288,120 +288,121 @@ ipsl_pcie_dma_ram ipsl_pcie_dma_bar0 (
     .rd_rst             (~rst_n                     )   // input
 );
 
-// ddr中缓存的图像数据
-
-reg                        bar2_wr_en_d1;
-reg    [ADDR_WIDTH-1:0]    bar2_wr_addr_d1;
-reg    [15:0]              bar2_wr_byte_en_d1;
-reg                        bar2_wr_en_d2;
-reg    [ADDR_WIDTH-1:0]    bar2_wr_addr_d2;
-reg    [15:0]              bar2_wr_byte_en_d2;
-
-// 记录cpu读取的次数，2025次表示1帧读取完毕
-reg [127:0]                test_data;/*synthesis PAP_MARK_DEBUG="1"*/
-always@(posedge clk)
-begin
-    if(~rst_n) begin
-        test_data <= 128'b0;
-    end
-    // when bar2_wr_en. read pixel data from ddr3
-    // cpu 读一次dma目前最大512个DW  每次4个DW为128位
-    // 即： cpu读一次有512/4=128个128位    即每次从DDR FIFO中读取128*128 = 16384位数据
-    // HDMI 配置为1920*1080@60Hz DDR中的数据为16位一个像素，HDMI的数据也可以16位一个像素  
-    // 一行数据为1920*16=30720  一帧数据为1920*1080*16=33177600
-    // CPU需要读取33177600/16384=2025次为1帧完整图像或33177600/128=259200个PCIE CLK
-    // DDR的数据位宽为32*8=256，所以CPU每读2次即bar2_wr_en高电平2个周期读一次DDR
-    // 即 ~cpu_dma_rd_cnt[0] & bar2_wr_en 时读一次DDR
-    // 将bar2_wr_en为读DDR有效信号发送给DDR模块，使用这种应该会方便很多，
-    // 将bar2_wr_en发送给DDR模块，DDR模块根据此信号返回读出的数据到PCIE模块即可
-    // 同时注意读取DDR中的数据消耗了几个时钟周期，对于的使能和地址信号应当进行延迟
-    else if(bar2_wr_en) begin
-        if(col_cnt < 60)begin
-            test_data <= {8{16'h0000}};
-        end
-        else if(col_cnt < 120)begin
-            test_data <= {{16'hF800},{16'hF801},{16'hF802},{16'hF803},{16'hF804},{16'hF805},{16'hF806},{16'hF807}};
-        end
-        else if(col_cnt < 180)begin
-            test_data <= {8{16'h07E0}};
-        end
-        else begin
-            test_data <= {8{16'h867D}};
-        end
-    end
-    else test_data <= 128'b0;
-end
-
-assign o_bar2_wr_en = bar2_wr_en;
-always@(posedge clk)
-begin
-    if(~rst_n) begin 
-        bar2_wr_en_d1 <= 0;
-        bar2_wr_addr_d1 <= 0;
-        bar2_wr_byte_en_d1 <= 0;
-        bar2_wr_en_d2 <= 0;
-        bar2_wr_addr_d2 <= 0;
-        bar2_wr_byte_en_d2 <= 0;
-    end
-    else begin
-        bar2_wr_en_d1 <= bar2_wr_en;
-        bar2_wr_addr_d1 <= bar2_wr_addr;
-        bar2_wr_byte_en_d1 <= bar2_wr_byte_en;
-        bar2_wr_en_d2 <= bar2_wr_en_d1;
-        bar2_wr_addr_d2 <= bar2_wr_addr_d1;
-        bar2_wr_byte_en_d2 <= bar2_wr_byte_en_d1;
-    end
-end
-
-// 128位有8个pix   8*240=1920为一行
-reg [7:0]  col_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
-reg [10:0] row_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
-always@(posedge clk)
-begin
-    if(~rst_n) begin
-        col_cnt <= 8'b0;
-    end
-    else if(bar2_wr_en && col_cnt < 239) begin
-        col_cnt <= col_cnt + 1'b1;
-    end
-    else if(col_cnt == 239) col_cnt <= 8'b0;
-    else col_cnt <= col_cnt;
-end
-always@(posedge clk)
-begin
-    if(~rst_n) begin
-        row_cnt <= 10'b0;
-    end
-    else if(col_cnt == 239) begin
-        row_cnt <= row_cnt + 1'b1;
-    end
-    else if(row_cnt == 1079) row_cnt <= 8'b0;
-    else row_cnt <= row_cnt;
-end
-
-// test data use d1, ddr data use d2
-wire [127:0] data_to_cpu;/*synthesis PAP_MARK_DEBUG="1"*/
-//assign data_to_cpu = endian_convert(test_data);
-assign data_to_cpu = endian_convert(i_rd_from_ddr);
-               
-//convert from little endian into big endian
-function [127:0] endian_convert;
-    input [127:0] data_in;
-    begin
-        endian_convert[32*0+31:32*0+0] = {data_in[32*0+7:32*0+0], data_in[32*0+15:32*0+8], data_in[32*0+23:32*0+16], data_in[32*0+31:32*0+24]};
-        endian_convert[32*1+31:32*1+0] = {data_in[32*1+7:32*1+0], data_in[32*1+15:32*1+8], data_in[32*1+23:32*1+16], data_in[32*1+31:32*1+24]};
-        endian_convert[32*2+31:32*2+0] = {data_in[32*2+7:32*2+0], data_in[32*2+15:32*2+8], data_in[32*2+23:32*2+16], data_in[32*2+31:32*2+24]};
-        endian_convert[32*3+31:32*3+0] = {data_in[32*3+7:32*3+0], data_in[32*3+15:32*3+8], data_in[32*3+23:32*3+16], data_in[32*3+31:32*3+24]};
-    end
-endfunction
+//// ddr中缓存的图像数据
+//
+//reg                        bar2_wr_en_d1;
+//reg    [ADDR_WIDTH-1:0]    bar2_wr_addr_d1;
+//reg    [15:0]              bar2_wr_byte_en_d1;
+//reg                        bar2_wr_en_d2;
+//reg    [ADDR_WIDTH-1:0]    bar2_wr_addr_d2;
+//reg    [15:0]              bar2_wr_byte_en_d2;
+//
+//// 记录cpu读取的次数，2025次表示1帧读取完毕
+//reg [127:0]                test_data;/*synthesis PAP_MARK_DEBUG="1"*/
+//always@(posedge clk)
+//begin
+//    if(~rst_n) begin
+//        test_data <= 128'b0;
+//    end
+//    // when bar2_wr_en. read pixel data from ddr3
+//    // cpu 读一次dma目前最大512个DW  每次4个DW为128位
+//    // 即： cpu读一次有512/4=128个128位    即每次从DDR FIFO中读取128*128 = 16384位数据
+//    // HDMI 配置为1920*1080@60Hz DDR中的数据为16位一个像素，HDMI的数据也可以16位一个像素  
+//    // 一行数据为1920*16=30720  一帧数据为1920*1080*16=33177600
+//    // CPU需要读取33177600/16384=2025次为1帧完整图像或33177600/128=259200个PCIE CLK
+//    // DDR的数据位宽为32*8=256，所以CPU每读2次即bar2_wr_en高电平2个周期读一次DDR
+//    // 即 ~cpu_dma_rd_cnt[0] & bar2_wr_en 时读一次DDR
+//    // 将bar2_wr_en为读DDR有效信号发送给DDR模块，使用这种应该会方便很多，
+//    // 将bar2_wr_en发送给DDR模块，DDR模块根据此信号返回读出的数据到PCIE模块即可
+//    // 同时注意读取DDR中的数据消耗了几个时钟周期，对于的使能和地址信号应当进行延迟
+//    else if(bar2_wr_en) begin
+//        if(col_cnt < 60)begin
+//            test_data <= {8{16'h0000}};
+//        end
+//        else if(col_cnt < 120)begin
+//            test_data <= {{16'hF800},{16'hF801},{16'hF802},{16'hF803},{16'hF804},{16'hF805},{16'hF806},{16'hF807}};
+//        end
+//        else if(col_cnt < 180)begin
+//            test_data <= {8{16'h07E0}};
+//        end
+//        else begin
+//            test_data <= {8{16'h867D}};
+//        end
+//    end
+//    else test_data <= 128'b0;
+//end
+//
+//assign o_bar2_wr_en = bar2_wr_en;
+//always@(posedge clk)
+//begin
+//    if(~rst_n) begin 
+//        bar2_wr_en_d1 <= 0;
+//        bar2_wr_addr_d1 <= 0;
+//        bar2_wr_byte_en_d1 <= 0;
+//        bar2_wr_en_d2 <= 0;
+//        bar2_wr_addr_d2 <= 0;
+//        bar2_wr_byte_en_d2 <= 0;
+//    end
+//    else begin
+//        bar2_wr_en_d1 <= bar2_wr_en;
+//        bar2_wr_addr_d1 <= bar2_wr_addr;
+//        bar2_wr_byte_en_d1 <= bar2_wr_byte_en;
+//        bar2_wr_en_d2 <= bar2_wr_en_d1;
+//        bar2_wr_addr_d2 <= bar2_wr_addr_d1;
+//        bar2_wr_byte_en_d2 <= bar2_wr_byte_en_d1;
+//    end
+//end
+//
+//// 128位有8个pix   8*240=1920为一行
+//reg [7:0]  col_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
+//reg [10:0] row_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
+//always@(posedge clk)
+//begin
+//    if(~rst_n) begin
+//        col_cnt <= 8'b0;
+//    end
+//    else if(bar2_wr_en && col_cnt < 239) begin
+//        col_cnt <= col_cnt + 1'b1;
+//    end
+//    else if(col_cnt == 239) col_cnt <= 8'b0;
+//    else col_cnt <= col_cnt;
+//end
+//always@(posedge clk)
+//begin
+//    if(~rst_n) begin
+//        row_cnt <= 10'b0;
+//    end
+//    else if(col_cnt == 239) begin
+//        row_cnt <= row_cnt + 1'b1;
+//    end
+//    else if(row_cnt == 1079) row_cnt <= 8'b0;
+//    else row_cnt <= row_cnt;
+//end
+//
+//// test data use d1, ddr data use d2
+//wire [127:0] data_to_cpu;/*synthesis PAP_MARK_DEBUG="1"*/
+////assign data_to_cpu = endian_convert(test_data);
+//assign data_to_cpu = endian_convert(i_rd_from_ddr);
+//               
+////convert from little endian into big endian
+//function [127:0] endian_convert;
+//    input [127:0] data_in;
+//    begin
+//        endian_convert[32*0+31:32*0+0] = {data_in[32*0+7:32*0+0], data_in[32*0+15:32*0+8], data_in[32*0+23:32*0+16], data_in[32*0+31:32*0+24]};
+//        endian_convert[32*1+31:32*1+0] = {data_in[32*1+7:32*1+0], data_in[32*1+15:32*1+8], data_in[32*1+23:32*1+16], data_in[32*1+31:32*1+24]};
+//        endian_convert[32*2+31:32*2+0] = {data_in[32*2+7:32*2+0], data_in[32*2+15:32*2+8], data_in[32*2+23:32*2+16], data_in[32*2+31:32*2+24]};
+//        endian_convert[32*3+31:32*3+0] = {data_in[32*3+7:32*3+0], data_in[32*3+15:32*3+8], data_in[32*3+23:32*3+16], data_in[32*3+31:32*3+24]};
+//    end
+//endfunction
 
 // mwr wr data
+/*
 ipsl_pcie_dma_ram ipsl_pcie_dma_bar2 (
     //.wr_data            (bar2_wr_data               ),  // input [127:0]
     .wr_data            (i_rd_from_ddr               ),  // input [127:0]
-    .wr_addr            (bar2_wr_addr_d2               ),  // input [8:0]
-    .wr_en              (bar2_wr_en_d2                 ),  // input
-    .wr_byte_en         (bar2_wr_byte_en_d2            ),  // input [15:0]
+    .wr_addr            (bar2_wr_addr_d1               ),  // input [8:0]
+    .wr_en              (bar2_wr_en_d1                 ),  // input
+    .wr_byte_en         (bar2_wr_byte_en_d1            ),  // input [15:0]
     .wr_clk             (clk                        ),  // input
     .wr_rst             (~rst_n                     ),  // input
     .rd_addr            (i_bar2_rd_addr             ),  // input [8:0]
@@ -409,6 +410,6 @@ ipsl_pcie_dma_ram ipsl_pcie_dma_bar2 (
     .rd_clk             (clk                        ),  // input
     .rd_clk_en          (i_bar2_rd_clk_en           ),  // input
     .rd_rst             (~rst_n                     )   // input
-);
+);*/
 
 endmodule

@@ -45,15 +45,15 @@ module ipsl_pcie_dma_tx_top #(
     //from dma_controller
     input                               i_user_define_data_flag ,
     //mwr
-    input                               i_mwr32_req             ,
-    output  wire                        o_mwr32_req_ack         ,
-    input                               i_mwr64_req             ,
-    output  wire                        o_mwr64_req_ack         ,
+    input                               i_mwr32_req             /*synthesis PAP_MARK_DEBUG="1"*/,
+    output  wire                        o_mwr32_req_ack         /*synthesis PAP_MARK_DEBUG="1"*/,
+    input                               i_mwr64_req             /*synthesis PAP_MARK_DEBUG="1"*/,
+    output  wire                        o_mwr64_req_ack         /*synthesis PAP_MARK_DEBUG="1"*/,
 
-    input                               i_mrd32_req             ,
-    output  wire                        o_mrd32_req_ack         ,
-    input                               i_mrd64_req             ,
-    output  wire                        o_mrd64_req_ack         ,
+    input                               i_mrd32_req             /*synthesis PAP_MARK_DEBUG="1"*/,
+    output  wire                        o_mrd32_req_ack         /*synthesis PAP_MARK_DEBUG="1"*/,
+    input                               i_mrd64_req             /*synthesis PAP_MARK_DEBUG="1"*/,
+    output  wire                        o_mrd64_req_ack         /*synthesis PAP_MARK_DEBUG="1"*/,
 
     input           [9:0]               i_req_length            ,
     input           [63:0]              i_req_addr              ,
@@ -62,11 +62,11 @@ module ipsl_pcie_dma_tx_top #(
 
     //**********************************************************************
     //bar0 rd interface
-    output  wire                        o_bar0_rd_clk_en        ,
+    output  wire                        o_bar0_rd_clk_en        /*synthesis PAP_MARK_DEBUG="1"*/,
     output  wire    [ADDR_WIDTH-1:0]    o_bar0_rd_addr          ,
     input           [127:0]             i_bar0_rd_data          ,
     //bar2 rd interface
-    output  wire                        o_bar2_rd_clk_en        ,
+    output  wire                        o_bar2_rd_clk_en        /*synthesis PAP_MARK_DEBUG="1"*/,
     output  wire    [ADDR_WIDTH-1:0]    o_bar2_rd_addr          ,
     input           [127:0]             i_bar2_rd_data          ,
     //**********************************************************************
@@ -79,13 +79,13 @@ module ipsl_pcie_dma_tx_top #(
     input           [7:0]               i_mrd_tag               ,
     input           [63:0]              i_mrd_addr              ,
 
-    input                               i_cpld_req_vld          ,
-    output  wire                        o_cpld_req_rdy          ,
-    output  wire                        o_cpld_tx_rdy           ,
+    input                               i_cpld_req_vld          /*synthesis PAP_MARK_DEBUG="1"*/,
+    output  wire                        o_cpld_req_rdy          /*synthesis PAP_MARK_DEBUG="1"*/,
+    output  wire                        o_cpld_tx_rdy           /*synthesis PAP_MARK_DEBUG="1"*/,
     //cpld rcv
-    input                               i_cpld_rcv              ,
+    input                               i_cpld_rcv              /*synthesis PAP_MARK_DEBUG="1"*/,
     input           [7:0]               i_cpld_tag              ,
-    output  wire                        o_tag_full              ,
+    output  wire                        o_tag_full              /*synthesis PAP_MARK_DEBUG="1"*/,
     //debug
     //rst tlp cnt
     input                               i_tx_restart
