@@ -6,5 +6,5 @@ rdfile*
 *.log
 device_map
 place_route
-report_timing
+report*
 generate_bitstream
