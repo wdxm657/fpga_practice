@@ -35,22 +35,19 @@ module rd_buf #(
     
     input                         vout_clk,
     input                         rd_fsync,
-    input                         rd_en,
+    input                         rd_en/*synthesis PAP_MARK_DEBUG="1"*/,
     output                        vout_de,
     output [PIX_WIDTH- 1'b1 : 0]  vout_data,
-    
-    input                         init_done,
     
     output                        ddr_rreq,
     output [ADDR_WIDTH- 1'b1 : 0] ddr_raddr,
     output [LEN_WIDTH- 1'b1 : 0]  ddr_rd_len,
     input                         ddr_rrdy,
     input                         ddr_rdone,
+    input                 [3:0]   current_4_frame_flag/*synthesis PAP_MARK_DEBUG="1"*/,
     
     input [8*DQ_WIDTH- 1'b1 : 0]  ddr_rdata,
-    input                         ddr_rdata_en,
-
-    output            reg            pcie_able
+    input                         ddr_rdata_en 
 );
     localparam SIM            = 1'b0;
     localparam RAM_WIDTH      = 16'd32;
@@ -74,12 +71,38 @@ module rd_buf #(
     end 
     assign rd_rst = ~rd_fsync_1d &rd_fsync;
     
+    reg [11:0] h_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
+    always @(posedge vout_clk)
+    begin
+        if(rd_fsync)
+            h_cnt <= 12'd0;
+        else if(rd_en)
+            h_cnt <= h_cnt + 12'd1;
+        else h_cnt <= 12'd0;
+    end 
+    reg [11:0] v_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
+    always @(posedge vout_clk)
+    begin
+        if(rd_fsync)
+            v_cnt <= 12'd0;
+        else if(h_cnt == H_NUM)
+            v_cnt <= v_cnt + 12'd1;
+        else v_cnt <= v_cnt;
+    end 
+
+wire hdmi1,hdmi2,hdmi3,hdmi4;/*synthesis PAP_MARK_DEBUG="1"*/
+assign hdmi1 = h_cnt >= 1 & h_cnt <= 3;/*synthesis PAP_MARK_DEBUG="1"*/
+assign hdmi2 = h_cnt >= 641 & h_cnt <= 643;/*synthesis PAP_MARK_DEBUG="1"*/
+assign hdmi3 = v_cnt >= 0 & v_cnt <= 359;/*synthesis PAP_MARK_DEBUG="1"*/
+assign hdmi4 = v_cnt >= 360 & v_cnt <= 720;/*synthesis PAP_MARK_DEBUG="1"*/
+reg hdmi1_d1,hdmi1_d2,hdmi1_d3;
+reg hdmi2_d1,hdmi2_d2,hdmi2_d3;
     //===========================================================================
     reg      wr_fsync_1d,wr_fsync_2d,wr_fsync_3d;
     wire     wr_rst;
     
-    reg      wr_en_1d,wr_en_2d,wr_en_3d;
-    reg      wr_trig;
+    reg      wr_en_1d,wr_en_2d,wr_en_3d;/*synthesis PAP_MARK_DEBUG="1"*/
+    reg      wr_trig;/*synthesis PAP_MARK_DEBUG="1"*/
     reg [11:0] wr_line;
     always @(posedge ddr_clk)
     begin
@@ -89,12 +112,19 @@ module rd_buf #(
         wr_fsync_3d <= wr_fsync_2d;
         
         // de in
+        hdmi1_d1 <= hdmi1;
+        hdmi1_d2 <= hdmi1_d1;
+        hdmi1_d3 <= hdmi1_d2;
+        hdmi2_d1 <= hdmi2;
+        hdmi2_d2 <= hdmi2_d1;
+        hdmi2_d3 <= hdmi2_d2;
         wr_en_1d <= rd_en;
         wr_en_2d <= wr_en_1d;
         wr_en_3d <= wr_en_2d;
         
         // de_in pos
-        wr_trig <= wr_rst || (~wr_en_3d && wr_en_2d && wr_line != V_NUM);
+        wr_trig <= wr_rst || (normal_line && (wr_line != V_NUM));
+        //wr_trig <= wr_rst || (line_fist || line_secd && (wr_line != V_NUM * 2));
     end 
     always @(posedge ddr_clk)
     begin
@@ -103,29 +133,39 @@ module rd_buf #(
         else if(wr_trig)
             wr_line <= wr_line + 12'd1;
     end 
-    
+    wire normal_line;/*synthesis PAP_MARK_DEBUG="1"*/
+    assign normal_line = wr_en_2d & ~wr_en_3d;
+    wire line_fist;/*synthesis PAP_MARK_DEBUG="1"*/
+    assign line_fist = hdmi1_d2 & ~hdmi1_d3;
+    wire line_secd;/*synthesis PAP_MARK_DEBUG="1"*/
+    assign line_secd = hdmi2_d2 & ~hdmi2_d3;
     // vs pos
     assign wr_rst = ~wr_fsync_3d && wr_fsync_2d;
-
-    always @(posedge ddr_clk)
-    begin 
-        if(wr_rst)
-            pcie_able <= 0;
-        else if( wr_line == V_NUM && ddr_rdone )
-            pcie_able <= 1;
-        else if(wr_trig)
-            pcie_able <= 0;
-    end 
-
+    
     //==========================================================================
-    reg [FRAME_CNT_WIDTH - 1'b1 :0] wr_frame_cnt=0;
-    always @(posedge ddr_clk)
-    begin 
-        if(wr_rst)
-            wr_frame_cnt <= wr_frame_cnt + 1'b1;
-        else
-            wr_frame_cnt <= wr_frame_cnt;
-    end 
+   reg [FRAME_CNT_WIDTH - 1'b1 :0] wr_frame_cnt;
+   always @(posedge ddr_clk)
+   begin 
+       if(wr_rst)
+           wr_frame_cnt <= wr_frame_cnt + 1'b1;
+       else
+           wr_frame_cnt <= wr_frame_cnt;
+   end 
+   //always @(*)
+   //begin 
+   //    if(wr_trig)begin
+   //        if (hdmi3 & hdmi1)
+   //            wr_frame_cnt <= ~current_4_frame_flag[3];
+   //        else if (hdmi3 & hdmi2)
+   //            wr_frame_cnt <= ~current_4_frame_flag[2];
+   //        else if (hdmi4 & hdmi1)
+   //            wr_frame_cnt <= ~current_4_frame_flag[1];
+   //        else if (hdmi4 & hdmi2)
+   //            wr_frame_cnt <= ~current_4_frame_flag[0];
+   //        else wr_frame_cnt <= 0;
+   //    end
+   //    else wr_frame_cnt <= wr_frame_cnt;
+   //end 
 
     reg [LINE_ADDR_WIDTH - 1'b1 :0] wr_cnt;
     always @(posedge ddr_clk)
@@ -133,14 +173,14 @@ module rd_buf #(
         if(wr_rst)
             wr_cnt <= 9'd0;
         else if(ddr_rdone)
-            wr_cnt <= wr_cnt + DDR_ADDR_OFFSET;
+            wr_cnt <= wr_cnt + 640;
         else
             wr_cnt <= wr_cnt;
     end 
     
     assign ddr_rreq = wr_trig;
     assign ddr_raddr = {wr_frame_cnt[0],wr_cnt} + ADDR_OFFSET;
-    assign ddr_rd_len = RD_ONE_LINE_NUM;
+    assign ddr_rd_len = 80;
     
     reg  [ 8:0]           wr_addr;
     reg  [11:0]           rd_addr;

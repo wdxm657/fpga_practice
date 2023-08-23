@@ -19,9 +19,9 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 `define UD #1
-//cmos1°¢cmos2∂˛—°“ª£¨◊˜Œ™ ”∆µ‘¥ ‰»Î
-//`define CMOS_1      //cmos1◊˜Œ™ ”∆µ ‰»Î£ª
-`define CMOS_2      //cmos2◊˜Œ™ ”∆µ ‰»Î£ª
+//cmos1„ÄÅcmos2‰∫åÈÄâ‰∏ÄÔºå‰Ωú‰∏∫ËßÜÈ¢ëÊ∫êËæìÂÖ•
+//`define CMOS_1      //cmos1‰Ωú‰∏∫ËßÜÈ¢ëËæìÂÖ•Ôºõ
+//`define CMOS_2      //cmos2‰Ωú‰∏∫ËßÜÈ¢ëËæìÂÖ•Ôºõ
 
 module TOP#(
 	parameter MEM_ROW_ADDR_WIDTH   = 15         ,
@@ -31,9 +31,20 @@ module TOP#(
 	parameter MEM_DQS_WIDTH        =  32/8
 )(
 	input                                sys_clk              ,//50Mhz
-/**/
+    input           l_key, //key 7
+    input           r_key, //key 8
+//ETH
+    output       phy_rstn,
+
+    input        rgmii_rxc,
+    input        rgmii_rx_ctl,
+    input [3:0]  rgmii_rxd,
+                 
+    output       rgmii_txc,
+    output       rgmii_tx_ctl,
+    output [3:0] rgmii_txd ,
 //OV5647
-    output  [1:0]                        cmos_init_done       ,//OV5640ºƒ¥Ê∆˜≥ı ºªØÕÍ≥…
+    output  [1:0]                        cmos_init_done       ,//OV5640ÂØÑÂ≠òÂô®ÂàùÂßãÂåñÂÆåÊàê
     //coms1	
     inout                                cmos1_scl            ,//cmos1 i2c 
     inout                                cmos1_sda            ,//cmos1 i2c 
@@ -75,23 +86,23 @@ module TOP#(
     inout                                iic_sda, 
     output                               iic_tx_scl                ,
     inout                                iic_tx_sda                ,
-   // output                               hdmi_int_led            ,
+    output                               hdmi_int_led              ,//HDMI_OUTÂàùÂßãÂåñÂÆåÊàê
 //HDMI_IN
-    input                                pixclk_in                ,                            
-    input                                vs_in                    , 
-    input                                hs_in                    , 
-    input                                de_in                    ,
-    input     [7:0]                      r_in                     , 
-    input     [7:0]                      g_in                     , 
-    input     [7:0]                      b_in                     ,  
+    input             pixclk_in,                            
+    input             vs_in    , 
+    input             hs_in    , 
+    input             de_in    ,
+    input     [7:0]   r_in     , 
+    input     [7:0]   g_in     , 
+    input     [7:0]   b_in     ,  
 //HDMI_OUT
-    output                              pix_clk_1080p            /*synthesis PAP_MARK_DEBUG="1"*/,              
-    output   reg                          vs_out                  , 
-    output   reg                          hs_out                   , 
-    output   reg                          de_out                   , 
-    output   reg   [7:0]                  r_out                    , 
-    output   reg   [7:0]                  g_out                    , 
-    output   reg   [7:0]                  b_out                    ,
+    output                               pix_clk_out            /*synthesis PAP_MARK_DEBUG="1"*/,              
+    output                               vs_out                   , 
+    output                               hs_out                   , 
+    output                               de_out                   , 
+    output        [7:0]                  r_out                    , 
+    output        [7:0]                  g_out                    , 
+    output        [7:0]                  b_out                    ,
 //PCIE
     input                       button_rst_n    ,
     input                       perst_n         ,
@@ -100,7 +111,7 @@ module TOP#(
     input           [1:0]       rxn             ,
     input           [1:0]       rxp             ,
     output  wire    [1:0]       txn             ,
-    output  wire    [1:0]       txp             
+    output  wire    [1:0]       txp         
 );
 /////////////////////////////////////////////////////////////////////////////////////
 // ENABLE_DDR
@@ -109,94 +120,6 @@ module TOP#(
 // PCIE
 localparam  DEVICE_TYPE   = 3'b000;//@IPC enum 3'b000,3'b001,3'b100
 localparam AXIS_SLAVE_NUM = 3      ;  //@IPC enum 1 2 3
-
-// pcie wire sigs
-wire pcie_ref_clk;
-wire pcie_pclk;
-wire pcie_pclk_div2;
-wire sync_perst_n;
-wire            pcie_cfg_ctrl_en        ;
-wire            axis_master_tready_cfg  ;
-
-wire            cfg_axis_slave0_tvalid  ;
-wire    [127:0] cfg_axis_slave0_tdata   ;
-wire            cfg_axis_slave0_tlast   ;
-wire            cfg_axis_slave0_tuser   ;
-
-//for mux
-wire            axis_master_tready_mem  ;
-wire            axis_master_tvalid_mem  ;
-wire    [127:0] axis_master_tdata_mem   ;
-wire    [3:0]   axis_master_tkeep_mem   ;
-wire            axis_master_tlast_mem   ;
-wire    [7:0]   axis_master_tuser_mem   ;
-
-wire            cross_4kb_boundary      ;
-
-wire            dma_axis_slave0_tvalid  ;
-wire    [127:0] dma_axis_slave0_tdata   ;
-wire            dma_axis_slave0_tlast   ;
-wire            dma_axis_slave0_tuser   ;
-
-//RESET DEBOUNCE and SYNC
-wire            sync_button_rst_n       ;
-wire            s_pclk_rstn             ;
-wire            s_pclk_div2_rstn        ;
-
-//********************** internal signal
-//AXIS master interface
-wire            axis_master_tvalid      ;
-wire            axis_master_tready      ;
-wire    [127:0] axis_master_tdata       ;
-wire    [3:0]   axis_master_tkeep       ;
-wire            axis_master_tlast       ;
-wire    [7:0]   axis_master_tuser       ;
-
-//axis slave 0 interface
-wire            axis_slave0_tready      ;
-wire            axis_slave0_tvalid      ;
-wire    [127:0] axis_slave0_tdata       ;
-wire            axis_slave0_tlast       ;
-wire            axis_slave0_tuser       ;
-
-//axis slave 1 interface
-wire            axis_slave1_tready      ;
-wire            axis_slave1_tvalid      ;
-wire    [127:0] axis_slave1_tdata       ;
-wire            axis_slave1_tlast       ;
-wire            axis_slave1_tuser       ;
-
-//axis slave 2 interface
-wire            axis_slave2_tready      ;
-wire            axis_slave2_tvalid      ;
-wire    [127:0] axis_slave2_tdata       ;
-wire            axis_slave2_tlast       ;
-wire            axis_slave2_tuser       ;
-
-wire    [7:0]   cfg_pbus_num            ;
-wire    [4:0]   cfg_pbus_dev_num        ;
-wire    [2:0]   cfg_max_rd_req_size     ;
-wire    [2:0]   cfg_max_payload_size    ;
-wire            cfg_rcb                 ;
-
-wire            cfg_ido_req_en          ;
-wire            cfg_ido_cpl_en          ;
-wire    [7:0]   xadm_ph_cdts            ;
-wire    [11:0]  xadm_pd_cdts            ;
-wire    [7:0]   xadm_nph_cdts           ;
-wire    [11:0]  xadm_npd_cdts           ;
-wire    [7:0]   xadm_cplh_cdts          ;
-wire    [11:0]  xadm_cpld_cdts          ;
-
-assign cfg_ido_req_en   =   1'b0;
-assign cfg_ido_cpl_en   =   1'b0;
-assign xadm_ph_cdts     =   8'b0;
-assign xadm_pd_cdts     =   12'b0;
-assign xadm_nph_cdts    =   8'b0;
-assign xadm_npd_cdts    =   12'b0;
-assign xadm_cplh_cdts   =   8'b0;
-assign xadm_cpld_cdts   =   12'b0;
-
 /////////////////////////////////////////////////////////////////////////////////////
     reg  [15:0]                 rstn_1ms            ;
 
@@ -221,10 +144,14 @@ assign xadm_cpld_cdts   =   12'b0;
     reg                         cmos2_vsync_d0      ;
     wire                        cmos2_pclk_16bit    ;
     wire[15:0]                  o_rgb565            ;
-    wire                        pclk_in_test        ;    
-    wire                        vs_in_test          ;
-    wire                        de_in_test          ;
-    wire[15:0]                  i_rgb565            ;
+    wire                        pclk_in_test_1        ;    
+    wire                        vs_in_test_1          ;
+    wire                        de_in_test_1          ;
+    wire[15:0]                  i_rgb565_1            ;
+    wire                        pclk_in_test_2        ;    
+    wire                        vs_in_test_2          ;
+    wire                        de_in_test_2          ;
+    wire[15:0]                  i_rgb565_2            ;
     wire                        de_re               ;
     wire                        hs_o               ;
 //axi bus   
@@ -232,7 +159,7 @@ assign xadm_cpld_cdts   =   12'b0;
     wire                        axi_awuser_ap              ;
     wire [3:0]                  axi_awuser_id              ;
     wire [3:0]                  axi_awlen                  ;
-    wire                        axi_awready                ;
+    wire                        axi_awready                ;/*synthesis PAP_MARK_DEBUG="1"*/
     wire                        axi_awvalid                ;
     wire [MEM_DQ_WIDTH*8-1:0]   axi_wdata                  ;
     wire [MEM_DQ_WIDTH*8/8-1:0] axi_wstrb                  ;
@@ -243,10 +170,10 @@ assign xadm_cpld_cdts   =   12'b0;
     wire                        axi_aruser_ap              ;
     wire [3:0]                  axi_aruser_id              ;
     wire [3:0]                  axi_arlen                  ;
-    wire                        axi_arready                ;/*synthesis PAP_MARK_DEBUG="1"*/
+    wire                        axi_arready                ;
     wire                        axi_arvalid                ;
-    wire [MEM_DQ_WIDTH*8-1:0]   axi_rdata                   /* synthesis syn_keep = 1 */;
-    wire                        axi_rvalid                 ;
+    wire [MEM_DQ_WIDTH*8-1:0]   axi_rdata                  ;
+    wire                        axi_rvalid                  /* synthesis syn_keep = 1 */;
     wire [3:0]                  axi_rid                    ;
     wire                        axi_rlast                  ;
     reg  [26:0]                 cnt                        ;
@@ -254,15 +181,85 @@ assign xadm_cpld_cdts   =   12'b0;
 /////////////////////////////////////////////////////////////////////////////////////
 wire pix_clk;
 //PLL
+    // 37.125Mhz  ~ 27ns   50Mhz = 20ns   100Mhz = 10ns
     ip_pll u_pll (
         .clkin1   (  sys_clk    ),//50MHz
         .clkout0  (  pix_clk    ),//37.125M 720P30 | 148.5M 1080P60
         .clkout1  (  cfg_clk    ),//10MHz
         .clkout2  (  clk_25M    ),//25M
+        .clkout3  (  clk_125m   ),      
+        .clkout4  (  clk_200m   ),      
         .pll_lock (  locked     )
     );
-wire init_over_tx;/*synthesis PAP_MARK_DEBUG="1"*/
-//≈‰÷√7210
+
+// ETH
+    wire clk_125m;
+    wire clk_200m;
+    wire         rgmii_clk;        
+    wire         rgmii_clk_90p; 
+    wire         mac_rx_data_valid;
+    wire [7:0]   mac_rx_data;    
+    wire         mac_data_valid;  
+    wire  [7:0]  mac_tx_data;  
+    reg          arp_req;
+    wire               udp_rec_data_valid;/*synthesis PAP_MARK_DEBUG="1"*/
+    wire [7:0]         udp_rec_rdata ;    /*synthesis PAP_MARK_DEBUG="1"*/
+    wire [15:0]        udp_rec_data_length;
+    wire        arp_found;
+    wire        mac_not_exist;
+    wire [7:0]  state;
+    wire [55:0] ack_data;
+    eth_udp_test eth_udp_test(
+        .rgmii_clk              (  rgmii_clk            ),//input                rgmii_clk,
+        .rstn                   (  locked                 ),//input                rstn,
+        .gmii_rx_dv             (  mac_rx_data_valid    ),//input                gmii_rx_dv,
+        .gmii_rxd               (  mac_rx_data          ),//input  [7:0]         gmii_rxd,
+        .gmii_tx_en             (  mac_data_valid       ),//output reg           gmii_tx_en,
+        .gmii_txd               (  mac_tx_data          ),//output reg [7:0]     gmii_txd,
+        .ack_data               (ack_data),
+                                                      
+        .udp_rec_data_valid     (  udp_rec_data_valid   ),//output               udp_rec_data_valid,         
+        .udp_rec_rdata          (  udp_rec_rdata        ),//output [7:0]         udp_rec_rdata ,             
+        .udp_rec_data_length    (  udp_rec_data_length  ) //output [15:0]        udp_rec_data_length         
+    );
+    
+    rgmii_interface rgmii_interface(
+        .rst                       (  ~locked              ),//input        rst,
+        .rgmii_clk                 (  rgmii_clk          ),//output       rgmii_clk,
+        .rgmii_clk_90p             (  rgmii_clk_90p      ),//input        rgmii_clk_90p,
+   
+        .mac_tx_data_valid         (  mac_data_valid     ),//input        mac_tx_data_valid,
+        .mac_tx_data               (  mac_tx_data        ),//input [7:0]  mac_tx_data,
+    
+        .mac_rx_error              (                     ),//output       mac_rx_error,
+        .mac_rx_data_valid         (  mac_rx_data_valid  ),//output       mac_rx_data_valid,
+        .mac_rx_data               (  mac_rx_data        ),//output [7:0] mac_rx_data,
+                                                         
+        .rgmii_rxc                 (  rgmii_rxc          ),//input        rgmii_rxc,
+        .rgmii_rx_ctl              (  rgmii_rx_ctl       ),//input        rgmii_rx_ctl,
+        .rgmii_rxd                 (  rgmii_rxd          ),//input [3:0]  rgmii_rxd,
+                                                         
+        .rgmii_txc                 (  rgmii_txc          ),//output       rgmii_txc,
+        .rgmii_tx_ctl              (  rgmii_tx_ctl       ),//output       rgmii_tx_ctl,
+        .rgmii_txd                 (  rgmii_txd          ) //output [3:0] rgmii_txd 
+    );
+assign phy_rstn = locked;
+wire eth_vs,eth_de_en;
+wire [15:0] eth_pix_data;
+gen_pix gen_pix(
+    .rgmii_rxc               (rgmii_rxc) ,
+    .rstn                    (locked) ,
+    .udp_rec_data_valid      (udp_rec_data_valid) ,
+    .udp_rec_rdata           (udp_rec_rdata),
+    .ack_data                (ack_data),
+    .udp_rec_data_length     (udp_rec_data_length),
+
+    .eth_vs                 (eth_vs),
+    .eth_de_en              (eth_de_en),
+    .eth_pix_data           (eth_pix_data)
+);
+
+//ÈÖçÁΩÆ7210
     ms72xx_ctl ms72xx_ctl(
         .clk             (  cfg_clk        ), //input       clk,
         .rst_n           (  rstn_out       ), //input       rstn,
@@ -273,7 +270,7 @@ wire init_over_tx;/*synthesis PAP_MARK_DEBUG="1"*/
         .iic_scl         (  iic_scl        ), //output      iic_scl,
         .iic_sda         (  iic_sda        )  //inout       iic_sda
     );
-  // assign    hdmi_int_led    =    init_over_tx; 
+   assign    hdmi_int_led    =    init_over_tx; 
     
     always @(posedge cfg_clk)
     begin
@@ -290,8 +287,42 @@ wire init_over_tx;/*synthesis PAP_MARK_DEBUG="1"*/
     
     assign rstn_out = (rstn_1ms == 16'h2710);
 
-//≈‰÷√CMOS///////////////////////////////////////////////////////////////////////////////////
+//ÈÖçÁΩÆCMOS///////////////////////////////////////////////////////////////////////////////////
 /**/
+    wire btn_deb_l;
+    btn_deb_fix#(                    
+        .BTN_WIDTH   (  4'd1        ), //parameter                  BTN_WIDTH = 4'd8
+        .BTN_DELAY   (20'h3_ffff    )
+    ) u_btn_deb                           
+    (                            
+        .clk         (  clk_25M         ),//input                      clk,
+        .btn_in      (  l_key         ),//input      [BTN_WIDTH-1:0] btn_in,
+                                    
+        .btn_deb_fix (  btn_deb_l     ) //output reg [BTN_WIDTH-1:0] btn_deb
+    );
+
+    wire btn_deb_r;
+    btn_deb_fix#(                    
+        .BTN_WIDTH   (  4'd1        ), //parameter                  BTN_WIDTH = 4'd8
+        .BTN_DELAY   (20'h3_ffff    )
+    ) u_btn_deb1                           
+    (                            
+        .clk         (  clk_25M         ),//input                      clk,
+        .btn_in      (  r_key         ),//input      [BTN_WIDTH-1:0] btn_in,
+                                    
+        .btn_deb_fix (  btn_deb_r     ) //output reg [BTN_WIDTH-1:0] btn_deb
+    );
+
+    reg l_rst;
+    always @(posedge clk_25M)
+    begin
+        l_rst <= `UD btn_deb_l;
+    end
+    reg r_rst;
+    always @(posedge clk_25M)
+    begin
+        r_rst <= `UD btn_deb_r;
+    end
 //OV5640 register configure enable    
     power_on_delay	power_on_delay_inst(
     	.clk_50M                 (sys_clk        ),//input
@@ -301,11 +332,12 @@ wire init_over_tx;/*synthesis PAP_MARK_DEBUG="1"*/
     	.camera_pwnd             (               ),//output
     	.initial_en              (initial_en     ) //output		
     );
-//CMOS1 Camera  
+//CMOS1 Camera 
     reg_config	coms1_reg_config(
     	.clk_25M                 (clk_25M            ),//input
     	.camera_rstn             (cmos1_reset        ),//input
     	.initial_en              (initial_en         ),//input		
+        .rstn                    (l_rst),		
     	.i2c_sclk                (cmos1_scl          ),//output
     	.i2c_sdat                (cmos1_sda          ),//inout
     	.reg_conf_done           (cmos_init_done[0]  ),//output config_finished
@@ -317,14 +349,15 @@ wire init_over_tx;/*synthesis PAP_MARK_DEBUG="1"*/
     reg_config	coms2_reg_config(
     	.clk_25M                 (clk_25M            ),//input
     	.camera_rstn             (cmos2_reset        ),//input
-    	.initial_en              (initial_en         ),//input		
+    	.initial_en              (initial_en         ),//input	
+        .rstn                    (r_rst),			
     	.i2c_sclk                (cmos2_scl          ),//output
     	.i2c_sdat                (cmos2_sda          ),//inout
     	.reg_conf_done           (cmos_init_done[1]  ),//output config_finished
     	.reg_index               (                   ),//output reg [8:0]
     	.clock_20k               (                   ) //output reg
     );
-//CMOS 8bit◊™16bit///////////////////////////////////////////////////////////////////////////////////
+//CMOS 8bitËΩ¨16bit///////////////////////////////////////////////////////////////////////////////////
 //CMOS1
     always@(posedge cmos1_pclk)
         begin
@@ -363,74 +396,74 @@ wire init_over_tx;/*synthesis PAP_MARK_DEBUG="1"*/
     	.pdata_o        (cmos2_d_16bit    ),//output[15:0]
     	.de_o           (cmos2_href_16bit ) //output
     );
-// ‰»Î ”∆µ‘¥—°‘Ò//////////////////////////////////////////////////////////////////////////////////////////
-`ifdef CMOS_1
-assign     pclk_in_test    =    cmos1_pclk_16bit    ;
-assign     vs_in_test      =    cmos1_vsync_d0      ;
-assign     de_in_test      =    cmos1_href_16bit    ;
-assign     i_rgb565        =    {cmos1_d_16bit[4:0],cmos1_d_16bit[10:5],cmos1_d_16bit[15:11]};//{r,g,b}
-`elsif CMOS_2
-assign     pclk_in_test    =    cmos2_pclk_16bit    ;
-assign     vs_in_test      =    cmos2_vsync_d0      ;
-assign     de_in_test      =    cmos2_href_16bit    ;
-assign     i_rgb565        =    {cmos2_d_16bit[4:0],cmos2_d_16bit[10:5],cmos2_d_16bit[15:11]};//{r,g,b}
-`endif
+//ËæìÂÖ•ËßÜÈ¢ëÊ∫êÈÄâÊã©//////////////////////////////////////////////////////////////////////////////////////////
+//ËæìÂÖ•ËßÜÈ¢ëÊ∫ê
+assign     pclk_in_test_1       =    cmos1_pclk_16bit    ;
+assign     vs_in_test_1         =    cmos1_vsync_d0      ;
+assign     de_in_test_1         =    cmos1_href_16bit    ;
+assign     i_rgb565_1           =    {cmos1_d_16bit[4:0],cmos1_d_16bit[10:5],cmos1_d_16bit[15:11]};//{r,g,b}
+
+assign     pclk_in_test_2       =    cmos2_pclk_16bit    ;
+assign     vs_in_test_2         =    cmos2_vsync_d0      ;
+assign     de_in_test_2         =    cmos2_href_16bit    ;
+assign     i_rgb565_2           =    {cmos2_d_16bit[4:0],cmos2_d_16bit[10:5],cmos2_d_16bit[15:11]};//{r,g,b}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**/
 
-wire [15:0] hdmi_rgb565;
-assign hdmi_rgb565 = {r_in[7:3],g_in[7:2],b_in[7:3]};
+wire [23:0] hdmi_rgb888;
+assign hdmi_rgb888 = {r_in,g_in,b_in};
+wire [23:0] ov_rgb888_1;
+assign ov_rgb888_1 = {i_rgb565_1[15:11],i_rgb565_1[15:13],i_rgb565_1[10:5],i_rgb565_1[10:9],i_rgb565_1[4:0],i_rgb565_1[4:2]};
+wire [23:0] ov_rgb888_2;
+assign ov_rgb888_2 = {i_rgb565_2[15:11],i_rgb565_2[15:13],i_rgb565_2[10:5],i_rgb565_2[10:9],i_rgb565_2[4:0],i_rgb565_2[4:2]};
 
-wire i_pcie_mwr_en;
-wire [127:0] o_ddr_data;
+wire cpu_rd_en;
+wire cpu_rd_vld;
+wire [127:0] cpu_rd_data;
 wire cpld_data_valid;
 wire [127:0] axis_rx_data;
-wire init_done;
 /* ddr buffer sig*/
-//–ﬁ∏ƒddr∂¡–¥ƒ£øÈv1   ¥Àƒ£øÈ”√”⁄HDMI 2 DDR 2 PCIE MWR
+//‰øÆÊîπddrËØªÂÜôÊ®°Âùóv1
     fram_buf#(
-    .H_NUM (1920),
-    .V_NUM (1080)
+    .H_NUM (1280),
+    .V_NUM (720)
     ) fram_buf(
         .ddr_clk        (  core_clk             ),//input                         ddr_clk,
         .ddr_rstn       (  ddr_init_done        ),//input                         ddr_rstn,
         //data_in  
-/*        cmos_ov5640       720p                
-        .vin_clk        (  pclk_in_test         ),//input                         vin_clk,
-        .wr_fsync       (  vs_in_test           ),//input                         wr_fsync,
-        .wr_en          (  de_in_test           ),//input                         wr_en,
-        .wr_data        (  i_rgb565             ),//input  [15 : 0]  wr_data,
+/*        cmos_ov5640 left      720p     */           
+        .l_ov_vin_clk        (  pclk_in_test_1        ),//input                         vin_clk,
+        .l_ov_wr_fsync       (  vs_in_test_1          ),//input                         wr_fsync,
+        .l_ov_wr_en          (  de_in_test_1          ),//input                         wr_en,
+        .l_ov_wr_data        (  ov_rgb888_1             ),//input  [23 : 0]  wr_data,
 /**/
-/*        hdmi_in              1080p */           
-        .vin_clk        (  pixclk_in            ),//input                         vin_clk,
-        .wr_fsync       (  vs_in                ),//input                         wr_fsync,
-        .wr_en          (  de_in                ),//input                         wr_en,
-        .wr_data        (  hdmi_rgb565          ),//input  [15 : 0]  wr_data,
+/*        cmos_ov5640 right      720p     */           
+        .r_ov_vin_clk        (  pclk_in_test_2        ),//input                         vin_clk,
+        .r_ov_wr_fsync       (  vs_in_test_2          ),//input                         wr_fsync,
+        .r_ov_wr_en          (  de_in_test_2          ),//input                         wr_en,
+        .r_ov_wr_data        (  ov_rgb888_2             ),//input  [23 : 0]  wr_data,
+/**/
+/*        hdmi              1080p */           
+        .hdmi_vin_clk        (  pixclk_in            ),//input                         vin_clk,
+        .hdmi_wr_fsync       (  vs_in                ),//input                         wr_fsync,
+        .hdmi_wr_en          (  de_in                ),//input                         wr_en,
+        .hdmi_wr_data        (  hdmi_rgb888          ),//input  [23 : 0]  wr_data,
+/**/
+/*        eth              360p */           
+        .eth_vin_clk        (  rgmii_rxc            ),//input                         vin_clk,
+        .eth_wr_fsync       (  eth_vs                ),//input                         wr_fsync,
+        .eth_wr_en          (  eth_de_en                ),//input                         wr_en,
+        .eth_wr_data        (  eth_pix_data          ),//input  [23 : 0]  wr_data,
+/**/
 
-/**/
         //data_out
-        //pcie
-
-        .pcie_clk       (pcie_pclk_div2),
-        .pcie_init_done (pcie_init_done),
-        .i_pcie_mwr_en  (i_pcie_mwr_en),
-        .o_ddr_data     (o_ddr_data),
-        
-        .cpu_data       (axis_rx_data),
-        .cpu_data_en    (cpld_data_valid),
-
-        // init doneµƒª∞æÕ «hdmi  ddr  hdmi
-        // cpu init done æÕ « hdmi  pcie  pcie  hdmi
-        .init_done      (  init_done            ),//output reg                    init_done,
-        //.cpu_init_done      (  init_done            ),//output reg                    init_done,
-
-        .vout_clk       (  pixclk_in              ),//input                         vout_clk,
+        .vout_clk       (  pix_clk              ),//input                         vout_clk,
         .rd_fsync       (  vs_o               ),//input                         rd_fsync,
         .rd_en          (  de_re                ),//input                         rd_en, 
         .vout_de        (  de_o               ),//output                        vout_de,
         .vout_data      (  o_rgb565             ),//output [PIX_WIDTH- 1'b1 : 0]  vout_data,
 
-
+        .init_done      (  init_done            ),//output reg                    init_done,
         //axi bus
         .axi_awaddr     (  axi_awaddr           ),// output[27:0]
         .axi_awid       (  axi_awuser_id        ),// output[3:0]
@@ -458,89 +491,9 @@ wire init_done;
         .axi_rlast      (  axi_rlast            ),// input
         .axi_rid        (  axi_rid              ) // input[3:0]         
     );
-
-// pcie dma -----------------------------------------------------------
-ipsl_pcie_dma #(
-    .DEVICE_TYPE            (DEVICE_TYPE            ),
-    .AXIS_SLAVE_NUM         (AXIS_SLAVE_NUM         )
-)
-u_ipsl_pcie_dma
-(
-    .clk                    (pcie_pclk_div2              ),  //gen1:62.5MHz,gen2:125MHz
-    .rst_n                  (core_rst_n             ),
-
-    // ddr
-    .o_pcie_mwr_en          (i_pcie_mwr_en)           ,
-    .i_ddr_data             (o_ddr_data)              ,
-    
-    .o_cpld_data_valid       (cpld_data_valid),
-    .axis_rx_data            (axis_rx_data),
-
-    //num
-    .i_cfg_pbus_num         (cfg_pbus_num           ),  //input [7:0]
-    .i_cfg_pbus_dev_num     (cfg_pbus_dev_num       ),  //input [4:0]
-    .i_cfg_max_rd_req_size  (cfg_max_rd_req_size    ),  //input [2:0]
-    .i_cfg_max_payload_size (cfg_max_payload_size   ),  //input [2:0]
-    //**********************************************************************
-    //axis master interface
-    .i_axis_master_tvld     (axis_master_tvalid_mem ),
-    .o_axis_master_trdy     (axis_master_tready_mem ),
-    .i_axis_master_tdata    (axis_master_tdata_mem  ),
-    .i_axis_master_tkeep    (axis_master_tkeep_mem  ),
-    .i_axis_master_tlast    (axis_master_tlast_mem  ),
-    .i_axis_master_tuser    (axis_master_tuser_mem  ),
-
-    //**********************************************************************
-    //axis_slave0 interface
-    .i_axis_slave0_trdy     (axis_slave0_tready     ),
-    .o_axis_slave0_tvld     (dma_axis_slave0_tvalid ),
-    .o_axis_slave0_tdata    (dma_axis_slave0_tdata  ),
-    .o_axis_slave0_tlast    (dma_axis_slave0_tlast  ),
-    .o_axis_slave0_tuser    (dma_axis_slave0_tuser  ),
-    //axis_slave1 interface
-    .i_axis_slave1_trdy     (axis_slave1_tready     ),
-    .o_axis_slave1_tvld     (axis_slave1_tvalid     ),
-    .o_axis_slave1_tdata    (axis_slave1_tdata      ),
-    .o_axis_slave1_tlast    (axis_slave1_tlast      ),
-    .o_axis_slave1_tuser    (axis_slave1_tuser      ),
-    //axis_slave2 interface
-    .i_axis_slave2_trdy     (axis_slave2_tready     ),
-    .o_axis_slave2_tvld     (axis_slave2_tvalid     ),
-    .o_axis_slave2_tdata    (axis_slave2_tdata      ),
-    .o_axis_slave2_tlast    (axis_slave2_tlast      ),
-    .o_axis_slave2_tuser    (axis_slave2_tuser      ),
-    //from pcie
-    .i_cfg_ido_req_en       (cfg_ido_req_en         ),
-    .i_cfg_ido_cpl_en       (cfg_ido_cpl_en         ),
-    .i_xadm_ph_cdts         (xadm_ph_cdts           ),
-    .i_xadm_pd_cdts         (xadm_pd_cdts           ),
-    .i_xadm_nph_cdts        (xadm_nph_cdts          ),
-    .i_xadm_npd_cdts        (xadm_npd_cdts          ),
-    .i_xadm_cplh_cdts       (xadm_cplh_cdts         ),
-    .i_xadm_cpld_cdts       (xadm_cpld_cdts         )
-);
-
-//ddr heart beat sig
-     always@(posedge core_clk) begin
-        if (!ddr_init_done)
-            cnt <= 27'd0;
-        else if ( cnt >= TH_1S )
-            cnt <= 27'd0;
-        else
-            cnt <= cnt + 27'd1;
-     end
-
-     always @(posedge core_clk)
-        begin
-        if (!ddr_init_done)
-            heart_beat_led <= 1'd1;
-        else if ( cnt >= TH_1S )
-            heart_beat_led <= ~heart_beat_led;
-    end
-
 /////////////////////////////////////////////////////////////////////////////////////
-//≤˙…˙visa ±–Ú 
-     sync_vg #(
+//‰∫ßÁîüvisaÊó∂Â∫è 
+     sync_vg /*#(
 //MODE_1080p
     .V_TOTAL   (12'd1125),
     .V_FP      (12'd4   ),
@@ -553,25 +506,26 @@ u_ipsl_pcie_dma
     .H_SYNC    (12'd44  ),
     .H_ACT     (12'd1920),
     .HV_OFFSET (12'd0   ) 
-    )    
+    ) */
      sync_vg(                            
-        .clk            (  pixclk_in              ),//input                   clk,                                 
+        .clk            (  pix_clk              ),//input                   clk,                                 
         .rstn           (  init_done            ),//input                   rstn,                            
         .vs_out         (  vs_o                 ),//output reg              vs_out,                                                                                                                                      
         .hs_out         (  hs_o                 ),//output reg              hs_out,            
         .de_out         (                       ),//output reg              de_out, 
         .de_re          (  de_re                )    
     );  
-/*
+////////////////////////////////////////////////////////////////////////////////////////////
+
      reg vs_o_d1, vs_o_d2;
      reg hs_o_d1, hs_o_d2;
-    always@(posedge pixclk_in) begin
+    always@(posedge pix_clk) begin
         vs_o_d1<=vs_o;
         vs_o_d2<=vs_o_d1;
         hs_o_d1<=hs_o;
         hs_o_d2<=hs_o_d1;
      end
-    assign pix_clk_1080p   =  pixclk_in    ;
+    assign pix_clk_out   =  pix_clk    ;
     assign r_out = {o_rgb565[15:11],o_rgb565[15:13]   };
     assign g_out = {o_rgb565[10:5],o_rgb565[10:9]    };
     assign b_out = {o_rgb565[4:0],o_rgb565[4:2]    };
@@ -579,11 +533,11 @@ u_ipsl_pcie_dma
     assign hs_out = hs_o_d2;
     assign de_out = de_o; 
 /**/
-/* hdmi out = hdmi in */
 
-assign pix_clk_1080p   =  pixclk_in    ;
+/* hdmi out = hdmi in
+assign pix_clk_out   =  pixclk_in    ;
 
-    always  @(posedge pix_clk_1080p)begin
+    always  @(posedge pix_clk_out)begin
         if(!init_over_tx)begin
             vs_out       <=  1'b0        ;
             hs_out       <=  1'b0        ;
@@ -602,73 +556,7 @@ assign pix_clk_1080p   =  pixclk_in    ;
         end
     end
 /**/
-/**/
 
-//----------------------------------------------------------rst debounce ----------------------------------------------------------
-//ASYNC RST  define IPSL_PCIE_SPEEDUP_SIM when simulation
-hsst_rst_cross_sync_v1_0 #(
-    `ifdef IPSL_PCIE_SPEEDUP_SIM
-    .RST_CNTR_VALUE     (16'h10             )
-    `else
-    .RST_CNTR_VALUE     (16'hC000           )
-    `endif
-)
-u_refclk_buttonrstn_debounce(
-    .clk                (pcie_ref_clk            ),
-    .rstn_in            (button_rst_n       ),
-    .rstn_out           (sync_button_rst_n  )
-);
-
-hsst_rst_cross_sync_v1_0 #(
-    `ifdef IPSL_PCIE_SPEEDUP_SIM
-    .RST_CNTR_VALUE     (16'h10             )
-    `else
-    .RST_CNTR_VALUE     (16'hC000           )
-    `endif
-)
-u_refclk_perstn_debounce(
-    .clk                (pcie_ref_clk            ),
-    .rstn_in            (perst_n            ),
-    .rstn_out           (sync_perst_n       )
-);
-
-ipsl_pcie_sync_v1_0  u_ref_core_rstn_sync    (
-    .clk                (pcie_ref_clk            ),
-    .rst_n              (core_rst_n         ),
-    .sig_async          (1'b1               ),
-    .sig_synced         (ref_core_rst_n     )
-);
-
-ipsl_pcie_sync_v1_0  u_pclk_core_rstn_sync   (
-    .clk                (pcie_pclk               ),
-    .rst_n              (core_rst_n         ),
-    .sig_async          (1'b1               ),
-    .sig_synced         (s_pclk_rstn        )
-);
-
-ipsl_pcie_sync_v1_0  u_pclk_div2_core_rstn_sync   (
-    .clk                (pcie_pclk_div2          ),
-    .rst_n              (core_rst_n         ),
-    .sig_async          (1'b1               ),
-    .sig_synced         (s_pclk_div2_rstn   )
-);
-
-assign axis_slave0_tvalid      = dma_axis_slave0_tvalid;
-assign axis_slave0_tlast       = dma_axis_slave0_tlast;
-assign axis_slave0_tuser       = dma_axis_slave0_tuser;
-assign axis_slave0_tdata       = dma_axis_slave0_tdata;
-
-assign axis_master_tvalid_mem  = axis_master_tvalid;
-assign axis_master_tdata_mem   = axis_master_tdata;
-assign axis_master_tkeep_mem   = axis_master_tkeep;
-assign axis_master_tlast_mem   = axis_master_tlast;
-assign axis_master_tuser_mem   = axis_master_tuser;
-
-assign axis_master_tready      = axis_master_tready_mem;
-wire pcie_init_done;
-wire smlh_link_up;
-wire rdlh_link_up;
-assign pcie_init_done = smlh_link_up & rdlh_link_up;
 //ddr    
         ip_ddr3 u_DDR3_50H (
              .ref_clk                   (sys_clk            ),
@@ -741,6 +629,259 @@ assign pcie_init_done = smlh_link_up & rdlh_link_up;
              .update_com_val_err_flag   (                   ),// output [3:0]
              .rd_fake_stop              (1'b0               ) // input
        );
+
+//heart beat sig
+     always@(posedge core_clk) begin
+        if (!ddr_init_done)
+            cnt <= 27'd0;
+        else if ( cnt >= TH_1S )
+            cnt <= 27'd0;
+        else
+            cnt <= cnt + 27'd1;
+     end
+
+     always @(posedge core_clk)
+        begin
+        if (!ddr_init_done)
+            heart_beat_led <= 1'd1;
+        else if ( cnt >= TH_1S )
+            heart_beat_led <= ~heart_beat_led;
+    end
+      
+
+// pcie wire sigs
+wire pcie_ref_clk;
+wire pcie_pclk;
+wire pcie_pclk_div2;
+wire sync_perst_n;
+wire            pcie_cfg_ctrl_en        ;
+wire            axis_master_tready_cfg  ;
+
+wire            cfg_axis_slave0_tvalid  ;
+wire    [127:0] cfg_axis_slave0_tdata   ;
+wire            cfg_axis_slave0_tlast   ;
+wire            cfg_axis_slave0_tuser   ;
+
+//for mux
+wire            axis_master_tready_mem  ;
+wire            axis_master_tvalid_mem  ;
+wire    [127:0] axis_master_tdata_mem   ;
+wire    [3:0]   axis_master_tkeep_mem   ;
+wire            axis_master_tlast_mem   ;
+wire    [7:0]   axis_master_tuser_mem   ;
+
+wire            cross_4kb_boundary      ;
+
+wire            dma_axis_slave0_tvalid  ;
+wire    [127:0] dma_axis_slave0_tdata   ;
+wire            dma_axis_slave0_tlast   ;
+wire            dma_axis_slave0_tuser   ;
+
+//RESET DEBOUNCE and SYNC
+wire            sync_button_rst_n       ;
+wire            s_pclk_rstn             ;
+wire            s_pclk_div2_rstn        ;
+
+//********************** internal signal
+//AXIS master interface
+wire            axis_master_tvalid      ;
+wire            axis_master_tready      ;
+wire    [127:0] axis_master_tdata       ;
+wire    [3:0]   axis_master_tkeep       ;
+wire            axis_master_tlast       ;
+wire    [7:0]   axis_master_tuser       ;
+
+//axis slave 0 interface
+wire            axis_slave0_tready      ;
+wire            axis_slave0_tvalid      ;
+wire    [127:0] axis_slave0_tdata       ;
+wire            axis_slave0_tlast       ;
+wire            axis_slave0_tuser       ;
+
+//axis slave 1 interface
+wire            axis_slave1_tready      ;
+wire            axis_slave1_tvalid      ;
+wire    [127:0] axis_slave1_tdata       ;
+wire            axis_slave1_tlast       ;
+wire            axis_slave1_tuser       ;
+
+//axis slave 2 interface
+wire            axis_slave2_tready      ;
+wire            axis_slave2_tvalid      ;
+wire    [127:0] axis_slave2_tdata       ;
+wire            axis_slave2_tlast       ;
+wire            axis_slave2_tuser       ;
+wire    [7:0]   cfg_pbus_num            ;
+wire    [4:0]   cfg_pbus_dev_num        ;
+wire    [2:0]   cfg_max_rd_req_size     ;
+wire    [2:0]   cfg_max_payload_size    ;
+wire            cfg_rcb                 ;
+
+wire            cfg_ido_req_en          ;
+wire            cfg_ido_cpl_en          ;
+wire    [7:0]   xadm_ph_cdts            ;
+wire    [11:0]  xadm_pd_cdts            ;
+wire    [7:0]   xadm_nph_cdts           ;
+wire    [11:0]  xadm_npd_cdts           ;
+wire    [7:0]   xadm_cplh_cdts          ;
+wire    [11:0]  xadm_cpld_cdts          ;
+
+assign cfg_ido_req_en   =   1'b0;
+assign cfg_ido_cpl_en   =   1'b0;
+assign xadm_ph_cdts     =   8'b0;
+assign xadm_pd_cdts     =   12'b0;
+assign xadm_nph_cdts    =   8'b0;
+assign xadm_npd_cdts    =   12'b0;
+assign xadm_cplh_cdts   =   8'b0;
+assign xadm_cpld_cdts   =   12'b0;
+
+pcie_trans pcie_trans(
+    //pcie
+    .pcie_clk        (pcie_pclk_div2),
+    .pcie_init_done  (pcie_init_done),
+    // fpga 2 cpu
+    .cpu_rd_en       (cpu_rd_en),
+    .cpu_rd_data     (cpu_rd_data),
+    .cpu_rd_vld      (cpu_rd_vld),
+    // cpu 2 fpga
+    .cpu_wr_en         (cpld_data_valid),
+    .cpu_wr_data       (axis_rx_data),
+                
+    .hdmi_clk       (pix_clk_out   ) ,                   
+    .hdmi_vld       (de_out        ) ,
+    .hdmi_hsync     (hs_out        ) ,
+    .hdmi_vsync     (vs_out        ) ,
+    .hdmi_565       (o_rgb565      )
+   );
+
+// pcie dma -----------------------------------------------------------
+ipsl_pcie_dma #(
+    .DEVICE_TYPE            (DEVICE_TYPE            ),
+    .AXIS_SLAVE_NUM         (AXIS_SLAVE_NUM         )
+)
+u_ipsl_pcie_dma
+(
+    .clk                    (pcie_pclk_div2              ),  //gen1:62.5MHz,gen2:125MHz
+    .rst_n                  (core_rst_n             ),
+
+    // fpga 2 cpu
+    .cpu_rd_en               (cpu_rd_en)           , 
+    .cpu_rd_data             (cpu_rd_data)              ,
+    .i_bar_rd_clk_en_vld     (cpu_rd_vld),
+    
+    // cpu 2 fpga
+    .o_cpld_data_valid       (cpld_data_valid),
+    .axis_rx_data            (axis_rx_data),
+
+    //num
+    .i_cfg_pbus_num         (cfg_pbus_num           ),  //input [7:0]
+    .i_cfg_pbus_dev_num     (cfg_pbus_dev_num       ),  //input [4:0]
+    .i_cfg_max_rd_req_size  (cfg_max_rd_req_size    ),  //input [2:0]
+    .i_cfg_max_payload_size (cfg_max_payload_size   ),  //input [2:0]
+    //**********************************************************************
+    //axis master interface
+    .i_axis_master_tvld     (axis_master_tvalid_mem ),
+    .o_axis_master_trdy     (axis_master_tready_mem ),
+    .i_axis_master_tdata    (axis_master_tdata_mem  ),
+    .i_axis_master_tkeep    (axis_master_tkeep_mem  ),
+    .i_axis_master_tlast    (axis_master_tlast_mem  ),
+    .i_axis_master_tuser    (axis_master_tuser_mem  ),
+
+    //**********************************************************************
+    //axis_slave0 interface
+    .i_axis_slave0_trdy     (axis_slave0_tready     ),
+    .o_axis_slave0_tvld     (dma_axis_slave0_tvalid ),
+    .o_axis_slave0_tdata    (dma_axis_slave0_tdata  ),
+    .o_axis_slave0_tlast    (dma_axis_slave0_tlast  ),
+    .o_axis_slave0_tuser    (dma_axis_slave0_tuser  ),
+    //axis_slave1 interface
+    .i_axis_slave1_trdy     (axis_slave1_tready     ),
+    .o_axis_slave1_tvld     (axis_slave1_tvalid     ),
+    .o_axis_slave1_tdata    (axis_slave1_tdata      ),
+    .o_axis_slave1_tlast    (axis_slave1_tlast      ),
+    .o_axis_slave1_tuser    (axis_slave1_tuser      ),
+    //axis_slave2 interface
+    .i_axis_slave2_trdy     (axis_slave2_tready     ),
+    .o_axis_slave2_tvld     (axis_slave2_tvalid     ),
+    .o_axis_slave2_tdata    (axis_slave2_tdata      ),
+    .o_axis_slave2_tlast    (axis_slave2_tlast      ),
+    .o_axis_slave2_tuser    (axis_slave2_tuser      ),
+    //from pcie
+    .i_cfg_ido_req_en       (cfg_ido_req_en         ),
+    .i_cfg_ido_cpl_en       (cfg_ido_cpl_en         ),
+    .i_xadm_ph_cdts         (xadm_ph_cdts           ),
+    .i_xadm_pd_cdts         (xadm_pd_cdts           ),
+    .i_xadm_nph_cdts        (xadm_nph_cdts          ),
+    .i_xadm_npd_cdts        (xadm_npd_cdts          ),
+    .i_xadm_cplh_cdts       (xadm_cplh_cdts         ),
+    .i_xadm_cpld_cdts       (xadm_cpld_cdts         )
+);
+
+//----------------------------------------------------------rst debounce ----------------------------------------------------------
+//ASYNC RST  define IPSL_PCIE_SPEEDUP_SIM when simulation
+hsst_rst_cross_sync_v1_0 #(
+    `ifdef IPSL_PCIE_SPEEDUP_SIM
+    .RST_CNTR_VALUE     (16'h10             )
+    `else
+    .RST_CNTR_VALUE     (16'hC000           )
+    `endif
+)
+u_refclk_buttonrstn_debounce(
+    .clk                (pcie_ref_clk            ),
+    .rstn_in            (button_rst_n       ),
+    .rstn_out           (sync_button_rst_n  )
+);
+
+hsst_rst_cross_sync_v1_0 #(
+    `ifdef IPSL_PCIE_SPEEDUP_SIM
+    .RST_CNTR_VALUE     (16'h10             )
+    `else
+    .RST_CNTR_VALUE     (16'hC000           )
+    `endif
+)
+u_refclk_perstn_debounce(
+    .clk                (pcie_ref_clk            ),
+    .rstn_in            (perst_n            ),
+    .rstn_out           (sync_perst_n       )
+);
+
+ipsl_pcie_sync_v1_0  u_ref_core_rstn_sync    (
+    .clk                (pcie_ref_clk            ),
+    .rst_n              (core_rst_n         ),
+    .sig_async          (1'b1               ),
+    .sig_synced         (ref_core_rst_n     )
+);
+
+ipsl_pcie_sync_v1_0  u_pclk_core_rstn_sync   (
+    .clk                (pcie_pclk               ),
+    .rst_n              (core_rst_n         ),
+    .sig_async          (1'b1               ),
+    .sig_synced         (s_pclk_rstn        )
+);
+
+ipsl_pcie_sync_v1_0  u_pclk_div2_core_rstn_sync   (
+    .clk                (pcie_pclk_div2          ),
+    .rst_n              (core_rst_n         ),
+    .sig_async          (1'b1               ),
+    .sig_synced         (s_pclk_div2_rstn   )
+);
+
+assign axis_slave0_tvalid      = dma_axis_slave0_tvalid;
+assign axis_slave0_tlast       = dma_axis_slave0_tlast;
+assign axis_slave0_tuser       = dma_axis_slave0_tuser;
+assign axis_slave0_tdata       = dma_axis_slave0_tdata;
+
+assign axis_master_tvalid_mem  = axis_master_tvalid;
+assign axis_master_tdata_mem   = axis_master_tdata;
+assign axis_master_tkeep_mem   = axis_master_tkeep;
+assign axis_master_tlast_mem   = axis_master_tlast;
+assign axis_master_tuser_mem   = axis_master_tuser;
+
+assign axis_master_tready      = axis_master_tready_mem;
+wire pcie_init_done;
+wire smlh_link_up;
+wire rdlh_link_up;
+assign pcie_init_done = smlh_link_up & rdlh_link_up;
 
 // pcie warp -----------------------------------------------------------
 ip_pcie my_pcie (
@@ -843,6 +984,6 @@ ip_pcie my_pcie (
     .rdlh_link_up               (rdlh_link_up          ),      //output
     .smlh_ltssm_state           (/*smlh_ltssm_state*/     )       //output  [4:0]
 );
-                 
+           
 /////////////////////////////////////////////////////////////////////////////////////
 endmodule

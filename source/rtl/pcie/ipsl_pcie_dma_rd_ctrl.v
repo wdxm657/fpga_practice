@@ -24,6 +24,7 @@ module ipsl_pcie_dma_rd_ctrl #(
     input           [63:0]              i_rd_addr       ,
     input                               i_tx_hold       ,
     input                               i_tlp_tx        ,
+    input                               i_bar_rd_clk_en_vld ,
 
     output  wire                        o_rd_ram_hold   ,
     output  wire                        o_gen_tlp_start ,

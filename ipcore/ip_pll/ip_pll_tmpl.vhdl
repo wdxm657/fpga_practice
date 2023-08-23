@@ -12,7 +12,9 @@ COMPONENT ip_pll
     pll_lock : OUT STD_LOGIC;
     clkout0 : OUT STD_LOGIC;
     clkout1 : OUT STD_LOGIC;
-    clkout2 : OUT STD_LOGIC
+    clkout2 : OUT STD_LOGIC;
+    clkout3 : OUT STD_LOGIC;
+    clkout4 : OUT STD_LOGIC
   );
 END COMPONENT;
 
@@ -23,5 +25,7 @@ the_instance_name : ip_pll
     pll_lock => pll_lock,
     clkout0 => clkout0,
     clkout1 => clkout1,
-    clkout2 => clkout2
+    clkout2 => clkout2,
+    clkout3 => clkout3,
+    clkout4 => clkout4
   );

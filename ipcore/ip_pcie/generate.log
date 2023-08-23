@@ -1,7 +1,7 @@
 IP Generator (Version 2022.1 build 99559)
 Check out license ...
-Start generating at 2023-05-29 19:24
-Instance: ip_pcie (C:\Users\29794\Desktop\fpga\pango_hdmi_pcie_ai_acc\ipcore\ip_pcie\ip_pcie.idf)
+Start generating at 2023-07-13 23:11
+Instance: ip_pcie (C:\Users\cixing\Desktop\fpga_practice\ipcore\ip_pcie\ip_pcie.idf)
 IP: PCI Express (1.3)
 Part: Logos-PGL50H-FBG484--6
 Create directory 'example_design' ...

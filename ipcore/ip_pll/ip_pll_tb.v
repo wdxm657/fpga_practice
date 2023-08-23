@@ -178,6 +178,8 @@ ip_pll U_ip_pll (
 .clkout0(clkout0),
     .clkout1(clkout1),
     .clkout2(clkout2),
+    .clkout3(clkout3),
+    .clkout4(clkout4),
     
     .clkin1(clkin1),
     

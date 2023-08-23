@@ -24,6 +24,7 @@ module ipsl_pcie_dma_tx_mwr_rd_ctrl #(
     input                               i_mwr_tx_busy   ,
     input                               i_mwr_tx_hold   ,
     input                               i_mwr_tlp_tx    ,
+    input                               i_bar_rd_clk_en_vld,
 
     output  wire                        o_gen_tlp_start ,
     output  wire    [127:0]             o_rd_data       ,
@@ -109,6 +110,7 @@ u_ipsl_pcie_dma_mwr_rd_ctrl
     .i_rd_addr              ({51'b0,rd_addr,2'b0}   ),
     .i_tx_hold              (i_mwr_tx_hold          ),
     .i_tlp_tx               (i_mwr_tlp_tx           ),
+    .i_bar_rd_clk_en_vld    (i_bar_rd_clk_en_vld)    ,
     .o_rd_ram_hold          (rd_ram_hold            ),
     .o_gen_tlp_start        (o_gen_tlp_start        ),
     .o_rd_data              (o_rd_data              ),

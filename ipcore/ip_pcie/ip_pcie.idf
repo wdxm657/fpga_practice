@@ -15,178 +15,20 @@
     </header>
     <param_list>
         <param>
-            <name>BAR3_MASK</name>
-            <value>31'h0</value>
+            <name>Axis_Slave_Num</name>
+            <value>3</value>
         </param>
         <param>
-            <name>Table_BIR</name>
-            <item>BAR0</item>
-            <item>BAR1</item>
-            <item>BAR2</item>
-            <value>BAR0</value>
-        </param>
-        <param>
-            <name>BAR4_Size</name>
-            <item>256</item>
-            <item>512</item>
-            <value>256</value>
-        </param>
-        <param>
-            <name>BAR0_PREFETCH</name>
-            <value>1'b0</value>
-        </param>
-        <param>
-            <name>Expansion_ROM_Size</name>
-            <item>2</item>
-            <item>4</item>
-            <item>8</item>
-            <item>16</item>
-            <item>32</item>
-            <item>64</item>
-            <item>128</item>
-            <item>256</item>
-            <item>512</item>
-            <value>2</value>
-        </param>
-        <param>
-            <name>BAR5_Size_Unit</name>
-            <item>Bytes</item>
-            <item>Kilobytes</item>
-            <item>Megabytes</item>
-            <item>Gigabytes</item>
-            <value>Bytes</value>
-        </param>
-        <param>
-            <name>Programming_Interface</name>
-            <value>00</value>
-        </param>
-        <param>
-            <name>BAR5_MASK_EN</name>
+            <name>Enable_Credit_Ports</name>
             <value>false</value>
         </param>
         <param>
-            <name>Per_Vector_Masking_Capable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>BAR0_MASK</name>
-            <value>31'hfff</value>
-        </param>
-        <param>
-            <name>MAX_PAYLOAD_SIZE_PAR</name>
+            <name>Table_BIR_Value</name>
             <value>3'd0</value>
         </param>
         <param>
-            <name>BAR2_MEM_IO</name>
-            <value>1'b0</value>
-        </param>
-        <param>
-            <name>ECRC_Gen</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Subsystem_Vendor_ID</name>
-            <value>0000</value>
-        </param>
-        <param>
-            <name>PBA_BIR_Value</name>
-            <value>3'd0</value>
-        </param>
-        <param>
-            <name>BAR2_MASK</name>
-            <value>31'hfff</value>
-        </param>
-        <param>
-            <name>Maximum_Link_Speed</name>
-            <value>5 GT/s</value>
-        </param>
-        <param>
-            <name>Table_Size</name>
-            <value>0x1</value>
-        </param>
-        <param>
-            <name>BAR2_Size_Unit</name>
-            <item>Bytes</item>
-            <item>Kilobytes</item>
-            <item>Megabytes</item>
-            <item>Gigabytes</item>
-            <item>Terabytes</item>
-            <item>Petabytes</item>
-            <item>Exabytes</item>
-            <value>Kilobytes</value>
-        </param>
-        <param>
-            <name>Extended_Tag_Field</name>
+            <name>ECRC_Check</name>
             <value>true</value>
-        </param>
-        <param>
-            <name>Reference_Clk</name>
-            <value>100 MHz</value>
-        </param>
-        <param>
-            <name>Vendor_ID</name>
-            <value>0755</value>
-        </param>
-        <param>
-            <name>INTX_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Subsystem_ID</name>
-            <value>0000</value>
-        </param>
-        <param>
-            <name>BAR1_Enable</name>
-            <value>true</value>
-        </param>
-        <param>
-            <name>BAR2_TYPE_PAR</name>
-            <value>2'd2</value>
-        </param>
-        <param>
-            <name>Expansion_ROM_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Power_Management_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>BAR1_Type</name>
-            <item>32bit Memory</item>
-            <value>32bit Memory</value>
-        </param>
-        <param>
-            <name>TPH_Cmplt_Support</name>
-            <value>00</value>
-        </param>
-        <param>
-            <name>BAR0_Size_Unit</name>
-            <item>Bytes</item>
-            <item>Kilobytes</item>
-            <item>Megabytes</item>
-            <item>Gigabytes</item>
-            <value>Kilobytes</value>
-        </param>
-        <param>
-            <name>Hot_Rst_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>DYN_Cfg_PCIe</name>
-            <value>true</value>
-        </param>
-        <param>
-            <name>BAR1_MASK_EN</name>
-            <value>true</value>
-        </param>
-        <param>
-            <name>BAR0_TYPE_PAR</name>
-            <value>2'd0</value>
-        </param>
-        <param>
-            <name>BAR3_Enable</name>
-            <value>false</value>
         </param>
         <param>
             <name>BAR1_Size_Unit</name>
@@ -197,100 +39,7 @@
             <value>Kilobytes</value>
         </param>
         <param>
-            <name>BAR2_Enable</name>
-            <value>true</value>
-        </param>
-        <param>
-            <name>BAR2_Type</name>
-            <item>32bit Memory</item>
-            <item>64bit Prefetchable Memory</item>
-            <item>64bit Non-Prefetchable Memory</item>
-            <value>64bit Non-Prefetchable Memory</value>
-        </param>
-        <param>
-            <name>PBA_BIR</name>
-            <item>BAR0</item>
-            <item>BAR1</item>
-            <item>BAR2</item>
-            <value>BAR0</value>
-        </param>
-        <param>
-            <name>Disable_Scrambling</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>PBA_Offset_Value</name>
-            <value>0</value>
-        </param>
-        <param>
-            <name>BAR3_Size_Unit</name>
-            <item>Bytes</item>
-            <item>Kilobytes</item>
-            <item>Megabytes</item>
-            <item>Gigabytes</item>
-            <value>Bytes</value>
-        </param>
-        <param>
-            <name>Device_ID</name>
-            <value>0755</value>
-        </param>
-        <param>
-            <name>Base_Class_Code</name>
-            <value>05</value>
-        </param>
-        <param>
-            <name>MAX_LINK_WIDTH</name>
-            <value>6'd2</value>
-        </param>
-        <param>
-            <name>BAR4_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>BAR5_Type</name>
-            <value>32bit Memory</value>
-        </param>
-        <param>
-            <name>MSI_PIN_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Max_Payload_Size</name>
-            <value>128 Bytes</value>
-        </param>
-        <param>
-            <name>INT_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Error_Handling_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>DLL_Active_Rep_Cap</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>MAX_LINK_SPEED</name>
-            <value>4'd2</value>
-        </param>
-        <param>
-            <name>Expansion_ROM_Size_Unit</name>
-            <value>Kilobytes</value>
-        </param>
-        <param>
-            <name>PBA_Offset</name>
-            <value>0x0</value>
-        </param>
-        <param>
-            <name>BAR0_Type</name>
-            <item>32bit Memory</item>
-            <item>64bit Prefetchable Memory</item>
-            <item>64bit Non-Prefetchable Memory</item>
-            <value>32bit Memory</value>
-        </param>
-        <param>
-            <name>Unlock_Message_Enable</name>
+            <name>ECRC_Gen</name>
             <value>false</value>
         </param>
         <param>
@@ -298,62 +47,44 @@
             <value>31'h0</value>
         </param>
         <param>
-            <name>Upconfigure_Capable</name>
-            <value>true</value>
+            <name>DLL_Active_Rep_Cap</name>
+            <value>false</value>
         </param>
         <param>
             <name>BAR1_MEM_IO</name>
             <value>1'b0</value>
         </param>
         <param>
-            <name>Table_BIR_Value</name>
-            <value>3'd0</value>
+            <name>BAR2_PREFETCH</name>
+            <value>1'b0</value>
         </param>
         <param>
-            <name>Atomic_Enable</name>
+            <name>BAR1_MASK_EN</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>BAR2_Enable</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>Device_Type</name>
+            <value>PCI Express Endpoint</value>
+        </param>
+        <param>
+            <name>TPH_Cmplt_Support</name>
+            <value>00</value>
+        </param>
+        <param>
+            <name>Vendor_ID</name>
+            <value>0755</value>
+        </param>
+        <param>
+            <name>INTX_Enable</name>
             <value>false</value>
         </param>
         <param>
-            <name>CRS</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Multiple_Message_Capable</name>
-            <value>1 Vector</value>
-        </param>
-        <param>
-            <name>Enable_Rcv_Queue_Manage</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>BAR0_Size</name>
-            <item>1</item>
-            <item>2</item>
-            <item>4</item>
-            <item>8</item>
-            <item>16</item>
-            <item>32</item>
-            <item>64</item>
-            <item>128</item>
-            <item>256</item>
-            <item>512</item>
-            <value>8</value>
-        </param>
-        <param>
-            <name>DEV_TYPE</name>
-            <value>3'b000</value>
-        </param>
-        <param>
-            <name>BAR5_MASK</name>
+            <name>BAR4_MASK</name>
             <value>31'h0</value>
-        </param>
-        <param>
-            <name>Table_Size_Value</name>
-            <value>1</value>
-        </param>
-        <param>
-            <name>MSIx_Enable</name>
-            <value>false</value>
         </param>
         <param>
             <name>BAR2_Size</name>
@@ -370,51 +101,354 @@
             <value>8</value>
         </param>
         <param>
-            <name>BAR3_Type</name>
-            <value>32bit Memory</value>
-        </param>
-        <param>
             <name>BAR0_Enable</name>
             <value>true</value>
         </param>
         <param>
-            <name>Interrupt_Pin</name>
-            <value>INTA</value>
+            <name>BAR4_MEM_IO</name>
+            <value>1'b0</value>
         </param>
         <param>
-            <name>Axis_Slave_Num</name>
-            <value>3</value>
+            <name>Extended_Tag_Field</name>
+            <value>true</value>
         </param>
         <param>
-            <name>Reference_Clk_Select</name>
-            <value>ref_clk1</value>
+            <name>Max_Payload_Size</name>
+            <value>256 Bytes</value>
         </param>
         <param>
-            <name>Table_Offset</name>
-            <value>0x0</value>
+            <name>ROM_BAR_ENABLED</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>Base_Class_Code</name>
+            <value>05</value>
+        </param>
+        <param>
+            <name>MAX_PAYLOAD_SIZE_PAR</name>
+            <value>3'd1</value>
+        </param>
+        <param>
+            <name>BAR3_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR2_MEM_IO</name>
+            <value>1'b0</value>
+        </param>
+        <param>
+            <name>Enable_Rcv_Queue_Manage</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>Disable_Scrambling</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>MSIx_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR3_Type</name>
+            <value>32bit Memory</value>
+        </param>
+        <param>
+            <name>BAR0_TYPE_PAR</name>
+            <value>2'd0</value>
+        </param>
+        <param>
+            <name>BAR2_Type</name>
+            <item>32bit Memory</item>
+            <item>64bit Prefetchable Memory</item>
+            <item>64bit Non-Prefetchable Memory</item>
+            <value>64bit Non-Prefetchable Memory</value>
+        </param>
+        <param>
+            <name>BAR0_MEM_IO</name>
+            <value>1'b0</value>
+        </param>
+        <param>
+            <name>BAR0_PREFETCH</name>
+            <value>1'b0</value>
         </param>
         <param>
             <name>BAR3_MEM_IO</name>
             <value>1'b0</value>
         </param>
         <param>
+            <name>RCB_Value</name>
+            <value>1'b1</value>
+        </param>
+        <param>
+            <name>Device_ID</name>
+            <value>0755</value>
+        </param>
+        <param>
+            <name>PBA_Offset_Value</name>
+            <value>0</value>
+        </param>
+        <param>
+            <name>Table_Size</name>
+            <value>0x1</value>
+        </param>
+        <param>
+            <name>HW_AUTO_SPEED_DISABLE</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>PBA_BIR</name>
+            <item>BAR0</item>
+            <item>BAR1</item>
+            <item>BAR2</item>
+            <value>BAR0</value>
+        </param>
+        <param>
+            <name>Table_Size_Value</name>
+            <value>1</value>
+        </param>
+        <param>
+            <name>BAR4_Type</name>
+            <value>32bit Memory</value>
+        </param>
+        <param>
+            <name>Error_Handling_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>PBA_BIR_Value</name>
+            <value>3'd0</value>
+        </param>
+        <param>
+            <name>Target_Link_Speed</name>
+            <value>5 GT/s</value>
+        </param>
+        <param>
+            <name>Unlock_Message_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>INT_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>Reference_Clk_Select</name>
+            <value>ref_clk1</value>
+        </param>
+        <param>
+            <name>MSI_64_Address_Capable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>MSI_MULTIPLE_MSG_CAP</name>
+            <value>3'd0</value>
+        </param>
+        <param>
+            <name>Enable_CfgOut_Ports</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>Maximum_Link_Speed</name>
+            <value>5 GT/s</value>
+        </param>
+        <param>
+            <name>LINK_CAPABLE</name>
+            <value>6'd3</value>
+        </param>
+        <param>
+            <name>BAR5_MASK_EN</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR0_Type</name>
+            <item>32bit Memory</item>
+            <item>64bit Prefetchable Memory</item>
+            <item>64bit Non-Prefetchable Memory</item>
+            <value>32bit Memory</value>
+        </param>
+        <param>
+            <name>Expansion_ROM_Size</name>
+            <item>2</item>
+            <item>4</item>
+            <item>8</item>
+            <item>16</item>
+            <item>32</item>
+            <item>64</item>
+            <item>128</item>
+            <item>256</item>
+            <item>512</item>
+            <value>2</value>
+        </param>
+        <param>
+            <name>BAR1_Enable</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>Hot_Rst_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR4_TYPE_PAR</name>
+            <value>2'd0</value>
+        </param>
+        <param>
+            <name>Reference_Clk</name>
+            <value>100 MHz</value>
+        </param>
+        <param>
+            <name>BAR3_MASK</name>
+            <value>31'h0</value>
+        </param>
+        <param>
             <name>BAR1_MASK</name>
             <value>31'h7ff</value>
         </param>
         <param>
-            <name>ECRC_Check</name>
-            <value>true</value>
+            <name>DEV_TYPE</name>
+            <value>3'b000</value>
         </param>
         <param>
-            <name>Sub_Class_Code</name>
-            <value>80</value>
+            <name>Atomic_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR0_Size_Unit</name>
+            <item>Bytes</item>
+            <item>Kilobytes</item>
+            <item>Megabytes</item>
+            <item>Gigabytes</item>
+            <value>Kilobytes</value>
+        </param>
+        <param>
+            <name>Per_Vector_Masking_Capable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>Subsystem_ID</name>
+            <value>0000</value>
+        </param>
+        <param>
+            <name>BAR5_Type</name>
+            <value>32bit Memory</value>
+        </param>
+        <param>
+            <name>Table_BIR</name>
+            <item>BAR0</item>
+            <item>BAR1</item>
+            <item>BAR2</item>
+            <value>BAR0</value>
         </param>
         <param>
             <name>Extended_Tag_Default</name>
             <value>true</value>
         </param>
         <param>
-            <name>MSI_64_Address_Capable</name>
+            <name>Revision_ID</name>
+            <value>00</value>
+        </param>
+        <param>
+            <name>BAR0_MASK</name>
+            <value>31'hfff</value>
+        </param>
+        <param>
+            <name>Enable_Debug_Ports</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>Expansion_ROM_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>Sub_Class_Code</name>
+            <value>80</value>
+        </param>
+        <param>
+            <name>BAR2_MASK</name>
+            <value>31'hfff</value>
+        </param>
+        <param>
+            <name>Enable_Debug_Share_Ports</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>BAR5_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR1_Type</name>
+            <item>32bit Memory</item>
+            <value>32bit Memory</value>
+        </param>
+        <param>
+            <name>DYN_Cfg_PCIe</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>BAR5_Size_Unit</name>
+            <item>Bytes</item>
+            <item>Kilobytes</item>
+            <item>Megabytes</item>
+            <item>Gigabytes</item>
+            <value>Bytes</value>
+        </param>
+        <param>
+            <name>BAR5_MASK</name>
+            <value>31'h0</value>
+        </param>
+        <param>
+            <name>Programming_Interface</name>
+            <value>00</value>
+        </param>
+        <param>
+            <name>BAR0_Size</name>
+            <item>1</item>
+            <item>2</item>
+            <item>4</item>
+            <item>8</item>
+            <item>16</item>
+            <item>32</item>
+            <item>64</item>
+            <item>128</item>
+            <item>256</item>
+            <item>512</item>
+            <value>8</value>
+        </param>
+        <param>
+            <name>BAR2_TYPE_PAR</name>
+            <value>2'd2</value>
+        </param>
+        <param>
+            <name>Enable_Lane_Reversal</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>Table_Offset</name>
+            <value>0x0</value>
+        </param>
+        <param>
+            <name>MAX_LINK_WIDTH</name>
+            <value>6'd2</value>
+        </param>
+        <param>
+            <name>BAR3_MASK_EN</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>MSI_PIN_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR2_Size_Unit</name>
+            <item>Bytes</item>
+            <item>Kilobytes</item>
+            <item>Megabytes</item>
+            <item>Gigabytes</item>
+            <item>Terabytes</item>
+            <item>Petabytes</item>
+            <item>Exabytes</item>
+            <value>Kilobytes</value>
+        </param>
+        <param>
+            <name>Power_Management_Enable</name>
             <value>false</value>
         </param>
         <param>
@@ -426,136 +460,16 @@
             <value>1'b0</value>
         </param>
         <param>
-            <name>BAR2_PREFETCH</name>
-            <value>1'b0</value>
-        </param>
-        <param>
-            <name>Enable_Debug_Ports</name>
-            <value>true</value>
-        </param>
-        <param>
-            <name>BAR3_MASK_EN</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>RCB_Value</name>
-            <value>1'b1</value>
-        </param>
-        <param>
-            <name>LINK_CAPABLE</name>
-            <value>6'd3</value>
-        </param>
-        <param>
-            <name>Cpl_Timeout_Ports</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>BAR4_MEM_IO</name>
-            <value>1'b0</value>
-        </param>
-        <param>
-            <name>BAR5_Size</name>
-            <item>256</item>
-            <item>512</item>
-            <value>256</value>
-        </param>
-        <param>
-            <name>Revision_ID</name>
-            <value>00</value>
-        </param>
-        <param>
-            <name>NUM_OF_LANES</name>
-            <value>5'b1</value>
+            <name>Target_Link_Speed_Value</name>
+            <value>4'h2</value>
         </param>
         <param>
             <name>Maximum_Link_Width</name>
             <value>X2</value>
         </param>
         <param>
-            <name>BAR4_PREFETCH</name>
-            <value>1'b0</value>
-        </param>
-        <param>
-            <name>BAR4_TYPE_PAR</name>
-            <value>2'd0</value>
-        </param>
-        <param>
-            <name>Enable_Lane_Reversal</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Enable_Credit_Ports</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Target_Link_Speed</name>
-            <value>5 GT/s</value>
-        </param>
-        <param>
-            <name>BAR4_Type</name>
-            <value>32bit Memory</value>
-        </param>
-        <param>
-            <name>BAR5_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>Device_Type</name>
-            <value>PCI Express Endpoint</value>
-        </param>
-        <param>
-            <name>BAR4_Size_Unit</name>
-            <item>Bytes</item>
-            <item>Kilobytes</item>
-            <item>Megabytes</item>
-            <item>Gigabytes</item>
-            <value>Bytes</value>
-        </param>
-        <param>
-            <name>BAR0_MEM_IO</name>
-            <value>1'b0</value>
-        </param>
-        <param>
-            <name>ROM_BAR_ENABLED</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>BAR4_MASK</name>
-            <value>31'h0</value>
-        </param>
-        <param>
-            <name>Enable_CfgOut_Ports</name>
-            <value>true</value>
-        </param>
-        <param>
-            <name>Target_Link_Speed_Value</name>
-            <value>4'h2</value>
-        </param>
-        <param>
-            <name>BAR3_Size</name>
-            <item>256</item>
-            <item>512</item>
-            <value>256</value>
-        </param>
-        <param>
-            <name>MSI_Enable</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>MSI_MULTIPLE_MSG_CAP</name>
-            <value>3'd0</value>
-        </param>
-        <param>
-            <name>Table_Offset_Value</name>
-            <value>0</value>
-        </param>
-        <param>
-            <name>Enable_Debug_Share_Ports</name>
-            <value>true</value>
-        </param>
-        <param>
-            <name>HW_AUTO_SPEED_DISABLE</name>
-            <value>false</value>
+            <name>Expansion_ROM_Size_Unit</name>
+            <value>Kilobytes</value>
         </param>
         <param>
             <name>BAR1_Size</name>
@@ -570,6 +484,92 @@
             <item>256</item>
             <item>512</item>
             <value>4</value>
+        </param>
+        <param>
+            <name>Subsystem_Vendor_ID</name>
+            <value>0000</value>
+        </param>
+        <param>
+            <name>NUM_OF_LANES</name>
+            <value>5'b1</value>
+        </param>
+        <param>
+            <name>Interrupt_Pin</name>
+            <value>INTA</value>
+        </param>
+        <param>
+            <name>BAR4_Size_Unit</name>
+            <item>Bytes</item>
+            <item>Kilobytes</item>
+            <item>Megabytes</item>
+            <item>Gigabytes</item>
+            <value>Bytes</value>
+        </param>
+        <param>
+            <name>BAR3_Size</name>
+            <item>256</item>
+            <item>512</item>
+            <value>256</value>
+        </param>
+        <param>
+            <name>Multiple_Message_Capable</name>
+            <value>1 Vector</value>
+        </param>
+        <param>
+            <name>PBA_Offset</name>
+            <value>0x0</value>
+        </param>
+        <param>
+            <name>Cpl_Timeout_Ports</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR4_PREFETCH</name>
+            <value>1'b0</value>
+        </param>
+        <param>
+            <name>MAX_LINK_SPEED</name>
+            <value>4'd2</value>
+        </param>
+        <param>
+            <name>CRS</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR4_Enable</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>BAR3_Size_Unit</name>
+            <item>Bytes</item>
+            <item>Kilobytes</item>
+            <item>Megabytes</item>
+            <item>Gigabytes</item>
+            <value>Bytes</value>
+        </param>
+        <param>
+            <name>Upconfigure_Capable</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>Table_Offset_Value</name>
+            <value>0</value>
+        </param>
+        <param>
+            <name>BAR5_Size</name>
+            <item>256</item>
+            <item>512</item>
+            <value>256</value>
+        </param>
+        <param>
+            <name>BAR4_Size</name>
+            <item>256</item>
+            <item>512</item>
+            <value>256</value>
+        </param>
+        <param>
+            <name>MSI_Enable</name>
+            <value>false</value>
         </param>
     </param_list>
     <pin_list>

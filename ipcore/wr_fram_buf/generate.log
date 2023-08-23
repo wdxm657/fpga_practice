@@ -1,7 +1,7 @@
 IP Generator (Version 2022.1 build 99559)
 Check out license ...
-Start generating at 2023-05-29 19:38
-Instance: wr_fram_buf (C:\Users\29794\Desktop\fpga\pango_hdmi_pcie_ai_acc\ipcore\wr_fram_buf\wr_fram_buf.idf)
+Start generating at 2023-06-22 17:12
+Instance: wr_fram_buf (C:\Users\29794\Desktop\fpga_pritace\ipcore\wr_fram_buf\wr_fram_buf.idf)
 IP: DRM Based Simple Dual Port RAM (1.6)
 Part: Logos-PGL50H-FBG484--6
 Create directory 'rtl' ...

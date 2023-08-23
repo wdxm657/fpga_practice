@@ -22,24 +22,26 @@ module ip_pll (
     clkout0,
     clkout1,
     clkout2,
+    clkout3,
+    clkout4,
     
     pll_lock
     );
 
     localparam real CLKIN_FREQ          = 50.0;
-    localparam integer STATIC_RATIOI    = 4;
-    localparam integer STATIC_RATIO0    = 8;
-    localparam integer STATIC_RATIO1    = 119;
-    localparam integer STATIC_RATIO2    = 48;
-    localparam integer STATIC_RATIO3    = 16;
-    localparam integer STATIC_RATIO4    = 16;
-    localparam integer STATIC_RATIOF    = 95;
-    localparam integer STATIC_DUTY0     = 8;
-    localparam integer STATIC_DUTY1     = 119;
-    localparam integer STATIC_DUTY2     = 48;
-    localparam integer STATIC_DUTY3     = 16;
-    localparam integer STATIC_DUTY4     = 16;
-    localparam integer STATIC_DUTYF     = 95;
+    localparam integer STATIC_RATIOI    = 3;
+    localparam integer STATIC_RATIO0    = 11;
+    localparam integer STATIC_RATIO1    = 82;
+    localparam integer STATIC_RATIO2    = 33;
+    localparam integer STATIC_RATIO3    = 7;
+    localparam integer STATIC_RATIO4    = 4;
+    localparam integer STATIC_RATIOF    = 49;
+    localparam integer STATIC_DUTY0     = 11;
+    localparam integer STATIC_DUTY1     = 82;
+    localparam integer STATIC_DUTY2     = 33;
+    localparam integer STATIC_DUTY3     = 7;
+    localparam integer STATIC_DUTY4     = 4;
+    localparam integer STATIC_DUTYF     = 49;
     localparam integer STATIC_PHASE0    = 16;
     localparam integer STATIC_PHASE1    = 16;
     localparam integer STATIC_PHASE2    = 16;
@@ -104,6 +106,8 @@ module ip_pll (
     output clkout0;
     output clkout1;
     output clkout2;
+    output clkout3;
+    output clkout4;
     
     output pll_lock;
 

@@ -48,17 +48,19 @@ module wr_buf #(
     input                         ddr_wdata_req,
     
     output [FRAME_CNT_WIDTH-1 :0] frame_wcnt,
-    output                        frame_wirq,
-    output                        hdmi_ddr_cur_fram
+    output                        frame_wirq
 );
     localparam RAM_WIDTH      = 16'd32;
     localparam DDR_DATA_WIDTH = DQ_WIDTH * 8; //256
     localparam WR_ONE_LINE_NUM    = H_NUM*PIX_WIDTH/RAM_WIDTH; //1280 * 16 / 32 = 640
                                                                //1920 * 16 / 32 = 960
+                                                               //960 * 16 / 32 = 480
     localparam RD_ONE_LINE_NUM    = WR_ONE_LINE_NUM*RAM_WIDTH/DDR_DATA_WIDTH; // 640 * 32 / 256 = 80
                                                                               // 960 * 32 / 256 = 120
+                                                                              // 480 * 32 / 256 = 60
     localparam DDR_ADDR_OFFSET = RD_ONE_LINE_NUM*DDR_DATA_WIDTH/DQ_WIDTH;  // 80 * 256 / 32 = 640
                                                                            // 120 * 256 / 32 = 960
+                                                                           // 60 * 256 / 32 = 480
     
     //===========================================================================
     reg       wr_fsync_1d;
@@ -102,7 +104,7 @@ module wr_buf #(
     reg [31 : 0]  write_data;
     reg [PIX_WIDTH- 1'b1 : 0]  wr_data_1d;
     reg                        write_en;
-    
+
 generate
     if(PIX_WIDTH == 6'd24)
     begin
@@ -315,5 +317,5 @@ endgenerate
     assign ddr_wr_len = RD_ONE_LINE_NUM;
     assign frame_wcnt = rd_frame_cnt;
     assign frame_wirq = wirq_en && rd_fsync_3d;
-    assign hdmi_ddr_cur_fram = rd_frame_cnt[0];
+    
 endmodule

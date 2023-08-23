@@ -167,7 +167,7 @@ module ipsl_pcie_wrap_v1_3_sim
 
     localparam               NUM_OF_LANES                   = 5'b1   ;   //@IPC bool
 
-    localparam               MAX_PAYLOAD_SIZE               = 3'd0   ;   //@IPC enum 3'd0,3'd1,3'd2,3'd3
+    localparam               MAX_PAYLOAD_SIZE               = 3'd1   ;   //@IPC enum 3'd0,3'd1,3'd2,3'd3
 
     localparam               INT_DISABLE                    = 1'b1;   //@IPC bool
 

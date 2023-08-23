@@ -21,9 +21,10 @@ module ipsl_pcie_dma #(
     input                               clk                     ,            //gen1:62.5MHz,gen2:125MHz
     input                               rst_n                   ,
 
-    // ddr
-    output                              o_pcie_mwr_en             ,
-    input           [127:0]             i_ddr_data                ,
+    // cpu
+    output                              cpu_rd_en             ,
+    input           [127:0]             cpu_rd_data                ,
+    input                               i_bar_rd_clk_en_vld    ,
 
     input           [7:0]               i_cfg_pbus_num          ,
     input           [4:0]               i_cfg_pbus_dev_num      ,
@@ -153,6 +154,7 @@ wire        [127:0]             bar1_wr_data;
 wire        [15:0]              bar1_wr_byte_en;
 //bar2 rd interface
 wire                            bar2_rd_clk_en;
+assign cpu_rd_en = bar2_rd_clk_en;
 wire        [ADDR_WIDTH-1:0]    bar2_rd_addr;
 wire        [127:0]             bar2_rd_data;
 //**********************************************************************
@@ -380,9 +382,10 @@ u_ipsl_pcie_dma_tx_top
     .o_bar0_rd_addr             (bar0_rd_addr               ),
     .i_bar0_rd_data             (bar0_rd_data               ),
     //bar2 rd interface
+    .i_bar_rd_clk_en_vld        (i_bar_rd_clk_en_vld),
     .o_bar2_rd_clk_en           (bar2_rd_clk_en             ),
     .o_bar2_rd_addr             (bar2_rd_addr               ),
-    .i_bar2_rd_data             (bar2_rd_data               ),
+    .i_bar2_rd_data             (cpu_rd_data               ), // -----------
     //**********************************************************************
     //from rx top
     //req rcv
