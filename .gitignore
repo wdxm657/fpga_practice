@@ -1,6 +1,8 @@
 compile
 synthesize
 impl.tcl
+*.wf
+rdfile*
 *.log
 device_map
 place_route
